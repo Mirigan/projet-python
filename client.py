@@ -59,38 +59,36 @@ def main_function():
 	"""Main function of the game"""
 	# Initialization
 	game_client = Client(sys.argv[1], int(sys.argv[2]))
-	
+
 	pygame.init()
 	screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 	clock = pygame.time.Clock()
 	pygame.key.set_repeat(1,1)
 
 	# Objects creation
-	background_image, background_rect = load_png('images/fond1.jpg')
+	background_image, background_rect = load_png('images/fond4.jpg')
 
 	# MAIN LOOP
 	while True:
 		clock.tick(60) # max speed is 60 frames per second
 		connection.Pump()
 		game_client.Pump()
-		     
-		
+
 		if game_client.run:
 
 			# Events handling
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					return # closing the window exits the program
-		
+
 			touches=pygame.key.get_pressed()
-			connection.Send({"action":"key","key":touches,"x":ship.rect.centerx,"y":ship.rect.centery})
-		
+			connection.Send({"action":"key","key":touches})
+
 			# updates    
-		
+
 			# drawings
 			screen.blit(background_image, background_rect)
-			ship_sprite.draw(screen)
-			
+
 			pygame.display.flip()
 
 

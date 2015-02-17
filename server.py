@@ -16,7 +16,7 @@ class ClientChannel(Channel):
 		self._server.del_client(self)
 
 	def Network(self,data):
-		print('message de type %s recu' % data['action'])
+		pass
 
 
 
