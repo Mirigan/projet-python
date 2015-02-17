@@ -54,7 +54,6 @@ class Client(ConnectionListener):
 		sys.exit()
  
 # MAIN
-
 def main_function():
 	"""Main function of the game"""
 	# Initialization
