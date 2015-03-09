@@ -70,13 +70,13 @@ class MyServer(Server):
     channelClass = ClientChannel
 
 
-def __init__(self, *args, **kwargs):
-    Server.__init__(self, *args, **kwargs)
-    self.clients = []
-    self.run = False
-    pygame.init()
-    self.screen = pygame.display.set_mode((128, 128))
-    print('Server launched')
+    def __init__(self, *args, **kwargs):
+        Server.__init__(self, *args, **kwargs)
+        self.clients = []
+        self.run = False
+        pygame.init()
+        self.screen = pygame.display.set_mode((128, 128))
+        print('Server launched')
 
     def Connected(self, channel, addr):
         self.clients.append(channel)
@@ -120,6 +120,53 @@ def __init__(self, *args, **kwargs):
     def draw_tirs(self, screen):
         for client in self.clients:
             client.tirs_group.draw(screen)
+
+    def launch_game(self):
+        # Init Pygame
+        pygame.display.set_caption('Server')
+
+        clock = pygame.time.Clock()
+        pygame.key.set_repeat(1,1)
+
+        # Elements
+        wait_image, wait_rect = load_png('images/wait.png')
+        self.screen.blit(wait_image, wait_rect)
+        ennemi_sprites = pygame.sprite.RenderClear()
+
+        shooting = 0
+        rythm = 60
+        counter = 0
+
+        while True:
+            clock.tick(60)
+            self.Pump()
+
+            if self.run:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        return
+
+                # updates
+                for channel in self.clients:
+                    pygame.sprite.groupcollide(ennemi_sprites, channel.tirs_group, True, True, pygame.sprite.collide_circle_ratio(0.7))
+                self.update_joueurs()
+                self.send_joueurs()
+                self.update_tirs()
+                self.send_tirs()
+                counter += 1
+                if counter == rythm:
+                    ennemi_sprites.add(Ennemi())
+                    counter = 0
+                    rythm -= 1 if rythm > 10 else 0
+                ennemi_sprites.update()
+                self.send_foes(ennemi_sprites)
+
+                # drawings
+                #screen.blit(background_image, background_rect)
+                #self.draw_ships(screen)
+                #self.draw_shots(screen)
+                #foes_sprites.draw(screen)
+            pygame.display.flip()
 
 
 # MAIN
