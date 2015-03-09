@@ -8,6 +8,8 @@ import sys
 import pygame
 import os
 from pygame.locals import *
+
+sys.path.append('./classes')
 from joueur import Joueur
 
 SCREEN_WIDTH = 1024
@@ -94,14 +96,15 @@ def __init__(self, *args, **kwargs):
         for client in self.clients:
             client.send_tirs()
 
-    def send_ennemi(self,ennemi_sprites):
+    def send_ennemi(self, ennemi_sprites):
         centers = []
         for sprite in ennemi_sprites.sprites():
             centers.append(sprite.rect.center)
         for channel in self.clients:
-            channel.Send({'action':'ennemi','length':len(centers),'centers':centers})
+            channel.Send({'action': 'ennemi', 'length': len(centers), 'centers': centers})
 
-# UPDATE FUNCTIONS
+        # UPDATE FUNCTIONS
+
     def update_joueurs(self):
         for client in self.clients:
             client.update_joueur()
@@ -110,11 +113,11 @@ def __init__(self, *args, **kwargs):
         for client in self.clients:
             client.update_tirs()
 
-    def draw_joueurs(self,screen):
+    def draw_joueurs(self, screen):
         for client in self.clients:
             screen.blit(client.joueur.image, client.joueur.rect)
 
-    def draw_tirs(self,screen):
+    def draw_tirs(self, screen):
         for client in self.clients:
             client.tirs_group.draw(screen)
 
