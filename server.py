@@ -9,8 +9,6 @@ import pygame
 import os
 from pygame.locals import *
 
-sys.path.append('./classes')
-from joueur import Joueur
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
@@ -169,7 +167,7 @@ class MyServer(Server):
                     counter = 0
                     rythm -= 1 if rythm > 10 else 0
                 ennemi_sprites.update()
-                self.send_foes(ennemi_sprites)
+                self.send_ennemi(ennemi_sprites)
 
                 # drawings
                 # screen.blit(background_image, background_rect)
@@ -179,6 +177,62 @@ class MyServer(Server):
             pygame.display.flip()
 
 
+# CLASSES
+class Joueur(pygame.sprite.Sprite):
+    """Class for the player's ship"""
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/joueur1_droite.png')
+        self.rect.center = [SCREEN_WIDTH/2, SCREEN_HEIGHT/2]
+        self.speed = [0,0]
+
+    def up(self):
+        if self.speed[1] > -5:
+            self.speed[1] -= 1
+
+    def down(self):
+        if self.speed[1] < 5:
+            self.speed[1] += 1
+
+    def left(self):
+        if self.speed[0] > -5:
+            self.speed[0] -= 1
+
+    def right(self):
+        if self.speed[0] < 5:
+            self.speed[0] += 1
+
+    def update(self):
+        self.rect = self.rect.move(self.speed)
+
+
+class Tir(pygame.sprite.Sprite):
+    """Class for the player's shots"""
+
+    def __init__(self, position):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/grenade.png')
+        self.rect.center = position
+
+    def update(self):
+        self.rect = self.rect.move([0, -10])
+        if self.rect.top < 0:
+            self.kill()
+
+
+class Ennemi(pygame.sprite.Sprite):
+    """Class for the baddies"""
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/momie.png')
+        self.rect.center = [0, 0]
+
+    def update(self):
+        self.rect = self.rect.move([0, 2])
+        if self.rect.top > SCREEN_HEIGHT:
+            self.kill()
 # MAIN
 def main_function():
     """Main function of the game"""
