@@ -71,7 +71,8 @@ def main_function():
 
 	# Objects creation
 	background_image, background_rect = load_png('images/fond4.jpg')
-    joueur = Joueur()
+	joueur = Joueur()
+	joueur_sprite = pygame.sprite.RenderClear(joueur)
     
 
 	# MAIN LOOP
@@ -87,15 +88,22 @@ def main_function():
 				if event.type == pygame.QUIT:
 					return # closing the window exits the program
 
-			touches=pygame.key.get_pressed()
-			connection.Send({"action":"key","key":touches})
+		if game_client.run:
+			keystrokes = pygame.key.get_pressed()
+			connection.Send({'action':'keys','keystrokes':keystrokes})
 
-			# updates    
+			# updates
+			joueur_sprite.update()
 
-			# drawings
+            # drawings
 			screen.blit(background_image, background_rect)
 
-			pygame.display.flip()
+			joueur_sprite.draw(screen)
+
+		else: # game is not running 
+			screen.blit(wait_image, wait_rect)
+
+		pygame.display.flip()  
 
 
 if __name__ == '__main__':
