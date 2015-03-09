@@ -12,7 +12,7 @@ from pygame.locals import *
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
-
+list_plat = []
 # FUNCTIONS
 def load_png(name):
     """Load image and return image object"""
@@ -34,8 +34,38 @@ class ClientChannel(Channel):
         Channel.__init__(self, *args, **kwargs)
         self.number = 0
         self.is_shooting = 0
+
         self.joueur = Joueur()
         self.tirs_group = pygame.sprite.RenderClear()
+        plateforme = Plateforme(0, 768)
+        self.plateforme_sprite = pygame.sprite.RenderClear(plateforme)
+        list_plat.append(plateforme)
+        plateforme = Plateforme(300, 768)
+        self.plateforme_sprite.add(plateforme)
+        list_plat.append(plateforme)
+        plateforme = Plateforme(600, 768)
+        self.plateforme_sprite.add(plateforme)
+        list_plat.append(plateforme)
+        plateforme = Plateforme(900, 768)
+        self.plateforme_sprite.add(plateforme)
+        list_plat.append(plateforme)
+        plateforme = Plateforme(0, 130)
+        self.plateforme_sprite.add(plateforme)
+        list_plat.append(plateforme)
+        plateforme = Plateforme(SCREEN_WIDTH - 300, 130)
+        self.plateforme_sprite.add(plateforme)
+        list_plat.append(plateforme)
+        plateforme = Plateforme(0, 0)
+        plateforme.rect.center = [SCREEN_WIDTH / 2, 245]
+        self.plateforme_sprite.add(plateforme)
+        list_plat.append(plateforme)
+        plateforme = Plateforme(100, 390)
+        self.plateforme_sprite.add(plateforme)
+        list_plat.append(plateforme)
+        plateforme = Plateforme(SCREEN_WIDTH - 400, 390)
+        self.plateforme_sprite.add(plateforme)
+        list_plat.append(plateforme)
+
 
     def Close(self):
         self._server.del_client(self)
@@ -59,7 +89,7 @@ class ClientChannel(Channel):
             centers.append(sprite.rect.center)
         self.Send({'action': 'tirs', 'length': len(sprites), 'centers': centers})
 
-    def update_joueur(self):
+    def update_joueurs(self):
         self.joueur.update()
         self.is_shooting -= 1 if self.is_shooting > 0 else 0
 
@@ -109,11 +139,11 @@ class MyServer(Server):
         for channel in self.clients:
             channel.Send({'action': 'ennemi', 'length': len(centers), 'centers': centers})
 
-            # UPDATE FUNCTIONS
+        # UPDATE FUNCTIONS
 
     def update_joueurs(self):
         for client in self.clients:
-            client.update_joueur()
+            client.update_joueurs()
 
     def update_tirs(self):
         for client in self.clients:
@@ -168,11 +198,11 @@ class MyServer(Server):
                 ennemi_sprites.update()
                 self.send_ennemi(ennemi_sprites)
 
-                # drawings
-                # screen.blit(background_image, background_rect)
-                # self.draw_ships(screen)
-                # self.draw_shots(screen)
-                # foes_sprites.draw(screen)
+            # drawings
+            # screen.blit(background_image, background_rect)
+            # self.draw_ships(screen)
+            # self.draw_shots(screen)
+            # foes_sprites.draw(screen)
             pygame.display.flip()
 
 
@@ -184,22 +214,74 @@ class Joueur(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/joueur1_droite.png')
         self.rect.bottomleft = [0, 738]
-        self.speed = [0, 0]
+        self.speed = [0, 6]
+
 
     def up(self):
-        if self.rect.top > 0:
-            self.rect = self.rect.move([0, -4])
+        if (self.collision_top(list_plat) == False):
+            if self.rect.top > 0:
+                self.rect = self.rect.move([0, -10])
 
     def left(self):
-        if self.rect.left > 0:
-            self.rect = self.rect.move([-4, 0])
+        if (self.collision_left(list_plat) == False):
+            if self.rect.left > 0:
+                self.rect = self.rect.move([-4, 0])
 
     def right(self):
-        if self.rect.right < SCREEN_WIDTH:
-            self.rect = self.rect.move([4, 0])
+        if (self.collision_right(list_plat) == False):
+            if self.rect.right < SCREEN_WIDTH:
+                self.rect = self.rect.move([4, 0])
 
     def update(self):
-        self.rect = self.rect.move(self.speed)
+        if (self.collision_bot(list_plat) == False):
+            self.rect = self.rect.move(self.speed)
+            if self.rect.bottom > SCREEN_HEIGHT - 30:
+                self.rect = self.rect.move([0, -4])
+
+    def is_under(self, platform):
+        return (pygame.Rect(self.rect.x, self.rect.y-3, self.rect.width, self.rect.height).colliderect(platform.rect))
+
+    def is_on(self, platform):
+        return (pygame.Rect(self.rect.x, self.rect.y+5, self.rect.width, self.rect.height).colliderect(platform.rect))
+
+    def is_left(self, platform):
+        return (pygame.Rect(self.rect.x+5, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))
+
+    def is_right(self, platform):
+        return (pygame.Rect(self.rect.x-3, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))
+
+    def collision_top(self, list_plat):
+        for plat in list_plat:
+            if self.is_under(plat):
+                return True
+        return False
+
+    def collision_bot(self, list_plat):
+        for plat in list_plat:
+            if self.is_on(plat):
+                return True
+        return False
+
+    def collision_left(self, list_plat):
+        for plat in list_plat:
+            if self.is_right(plat):
+                return True
+        return False
+
+    def collision_right(self, list_plat):
+        for plat in list_plat:
+            if self.is_left(plat):
+                return True
+        return False
+
+
+class Plateforme(pygame.sprite.Sprite):
+    """Classe des Plateformes"""
+
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/plateforme.png')
+        self.rect.bottomleft = [x, y]
 
 
 class Tir(pygame.sprite.Sprite):
@@ -214,6 +296,7 @@ class Tir(pygame.sprite.Sprite):
         self.rect = self.rect.move([0, -10])
         if self.rect.top < 0:
             self.kill()
+
 
 class Ennemi(pygame.sprite.Sprite):
     """Class for the baddies"""
