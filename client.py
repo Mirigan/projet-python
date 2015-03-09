@@ -33,9 +33,13 @@ def load_png(name):
 
 # PODSIXNET
 class Client(ConnectionListener):
-	def __init__(self, host, port):
-		self.run = False
-		self.Connect((host, port))
+    def __init__(self, host, port):
+        self.run = False
+        self.Connect((host, port))
+
+    def Network_connected(self, data):
+        self.run = True
+        print('client connecte au serveur !')
 
 	def Network(self, data):
 		print('message de type %s recu' % data['action'])
