@@ -110,6 +110,7 @@ def main_function():
 	wait_rect.center = background_rect.center
 	screen.blit(background_image, background_rect)
 	joueur = Joueur()
+	joueur_sprite = pygame.sprite.RenderClear(joueur)
 	plateforme = Plateforme(0, 768)
 	plateforme_sprite = pygame.sprite.RenderClear(plateforme)
 	plateforme = Plateforme(300,768)
@@ -129,7 +130,7 @@ def main_function():
 	plateforme_sprite.add(plateforme)
 	plateforme = Plateforme(SCREEN_WIDTH-400,390)
 	plateforme_sprite.add(plateforme)
-	joueur_sprite = pygame.sprite.RenderClear(joueur)
+	
 	
     
 
