@@ -103,7 +103,7 @@ class MyServer(Server):
         for channel in self.clients:
             channel.Send({'action': 'ennemi', 'length': len(centers), 'centers': centers})
 
-        # UPDATE FUNCTIONS
+            # UPDATE FUNCTIONS
 
     def update_joueurs(self):
         for client in self.clients:
@@ -126,7 +126,7 @@ class MyServer(Server):
         pygame.display.set_caption('Server')
 
         clock = pygame.time.Clock()
-        pygame.key.set_repeat(1,1)
+        pygame.key.set_repeat(1, 1)
 
         # Elements
         wait_image, wait_rect = load_png('images/wait.png')
@@ -148,7 +148,8 @@ class MyServer(Server):
 
                 # updates
                 for channel in self.clients:
-                    pygame.sprite.groupcollide(ennemi_sprites, channel.tirs_group, True, True, pygame.sprite.collide_circle_ratio(0.7))
+                    pygame.sprite.groupcollide(ennemi_sprites, channel.tirs_group, True, True,
+                                               pygame.sprite.collide_circle_ratio(0.7))
                 self.update_joueurs()
                 self.send_joueurs()
                 self.update_tirs()
@@ -162,7 +163,7 @@ class MyServer(Server):
                 self.send_foes(ennemi_sprites)
 
                 # drawings
-                #screen.blit(background_image, background_rect)
+                # screen.blit(background_image, background_rect)
                 #self.draw_ships(screen)
                 #self.draw_shots(screen)
                 #foes_sprites.draw(screen)
