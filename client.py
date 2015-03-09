@@ -73,6 +73,9 @@ def main_function():
 
 	# Objects creation
 	background_image, background_rect = load_png('images/fond4.jpg')
+	wait_image, wait_rect = load_png('images/wait1.png')
+	wait_rect.center = background_rect.center
+	screen.blit(background_image, background_rect)
 	joueur = Joueur()
 	plateforme = Plateforme(0, 768)
 	plateforme_sprite = pygame.sprite.RenderClear(plateforme)
