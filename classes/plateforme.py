@@ -9,6 +9,7 @@ import sys, pygame
 import os
 import time
 from pygame.locals import *
+from PodSixNet.Connection import ConnectionListener
 import random
 
 SCREEN_WIDTH = 1024
@@ -29,10 +30,13 @@ def load_png(name):
         raise SystemExit, message
     return image,image.get_rect()
 
-class Plateforme(pygame.sprite.Sprite):
+class Plateforme(pygame.sprite.Sprite, ConnectionListener):
     """Classe des Plateformes"""
 
-    def __init__(self, ship):
+    def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/plateforme.png')
-        self.rect.center = ship.rect.center
+        self.rect.bottomleft = [x,y]
+        
+	def update(self):
+		self.Pump()

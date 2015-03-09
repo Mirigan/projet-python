@@ -27,16 +27,12 @@ class Joueur(pygame.sprite.Sprite, ConnectionListener):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/joueur1_droite.png')
-        self.rect.bottomleft = [0, 768]
+        self.rect.bottomleft = [0, 738]
         self.speed = [0,0]
 
     def up(self):
         if self.speed[1] > -5:
             self.speed[1] -= 1
-
-    def down(self):
-        if self.speed[1] < 5:
-            self.speed[1] += 1
 
     def left(self):
         if self.speed[0] > -5:
