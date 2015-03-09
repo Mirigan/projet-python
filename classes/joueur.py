@@ -3,6 +3,7 @@ import pygame
 import os
 import time
 from pygame.locals import *
+from PodSixNet.Connection import ConnectionListener
 import random
 
 # FUNCTIONS
@@ -21,12 +22,29 @@ def load_png(name):
     return image,image.get_rect()
 
 # CLASSES
-class Joueur(pygame.sprite.Sprite):
+class Joueur(pygame.sprite.Sprite, ConnectionListener):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/joueur1_droite.png')
-        self.rect.center = [0, 768]
+        self.rect.bottomleft = [0, 768]
+        self.speed = [0,0]
+
+    def up(self):
+        if self.speed[1] > -5:
+            self.speed[1] -= 1
+
+    def down(self):
+        if self.speed[1] < 5:
+            self.speed[1] += 1
+
+    def left(self):
+        if self.speed[0] > -5:
+            self.speed[0] -= 1
+
+    def right(self):
+        if self.speed[0] < 5:
+            self.speed[0] += 1
     
     def Network_Joueur(self,data):
         self.rect.center = data['center']

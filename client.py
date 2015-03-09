@@ -12,7 +12,8 @@ import math
 from pygame.locals import *
 from PodSixNet.Connection import connection, ConnectionListener
 import random
-from classes.joueur import Joueur
+sys.path.append('./classes')
+from joueur import Joueur
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
