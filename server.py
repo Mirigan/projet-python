@@ -46,9 +46,9 @@ class ClientChannel(Channel):
             self.joueur.right()
         if (touche[K_UP]):
             self.joueur.up()
+        self.send_joueur()
 
     def send_joueur(self):
-
         self.Send({'action': 'joueur', 'center': self.joueur.rect.center})
 
     def send_tirs(self):
@@ -83,6 +83,10 @@ class MyServer(Server):
         self.clients.append(channel)
         channel.number = len(self.clients)
         print('New connection: %d client(s) connected' % len(self.clients))
+        if len(self.clients) == 1:
+            self.run = True
+            '''wheels_image, wheels_rect = load_png('images/wheels.png')'''
+            '''self.screen.blit(wheels_image, wheels_rect)'''
 
     def del_client(self, channel):
         print('client deconnected')
@@ -166,8 +170,8 @@ class MyServer(Server):
                 # drawings
                 # screen.blit(background_image, background_rect)
                 # self.draw_ships(screen)
-                #self.draw_shots(screen)
-                #foes_sprites.draw(screen)
+                # self.draw_shots(screen)
+                # foes_sprites.draw(screen)
             pygame.display.flip()
 
 
