@@ -12,9 +12,6 @@ import math
 from pygame.locals import *
 from PodSixNet.Connection import connection, ConnectionListener
 import random
-sys.path.append('./classes')
-from joueur import Joueur
-from plateforme import Plateforme
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
@@ -34,11 +31,48 @@ def load_png(name):
 		raise SystemExit, message
 	return image,image.get_rect()
 
+# CLASSES
+class Joueur(pygame.sprite.Sprite, ConnectionListener):
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/joueur1_droite.png')
+        self.rect.bottomleft = [0, 738]
+    
+    def Network_Joueur(self,data):
+        self.rect.center = data['center']
+
+    def update(self):
+        self.Pump()
+        
+class Plateforme(pygame.sprite.Sprite, ConnectionListener):
+    """Classe des Plateformes"""
+
+    def __init__(self,x,y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/plateforme.png')
+        self.rect.bottomleft = [x,y]
+        
+	def update(self):
+		self.Pump()
+		
+class Tir(pygame.sprite.Sprite):
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/tir.png')
+
+    def update(self,center):
+        self.rect.center = center
+
 # PODSIXNET
 class Client(ConnectionListener):
     def __init__(self, host, port):
         self.run = False
-        self.Connect((host, port))
+        try:
+         	self.Connect((host, port))
+        except:
+			sys.exit(-1)
 
     def Network_connected(self, data):
         self.run = True
@@ -65,6 +99,7 @@ def main_function():
 	"""Main function of the game"""
 	# Initialization
 	game_client = Client(sys.argv[1], int(sys.argv[2]))
+	
 
 	pygame.init()
 	screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
