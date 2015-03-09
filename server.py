@@ -52,18 +52,19 @@ class ClientChannel(Channel):
         self.Send({'action': 'joueur', 'center': self.joueur.rect.center})
 
     def send_tirs(self):
-          centers = []
-          sprites = self.tirs_group.sprites()
-          for sprite in sprites:
-              centers.append(sprite.rect.center)
-          self.Send({'action': 'tirs', 'length': len(sprites), 'centers': centers})
+        centers = []
+        sprites = self.tirs_group.sprites()
+        for sprite in sprites:
+            centers.append(sprite.rect.center)
+        self.Send({'action': 'tirs', 'length': len(sprites), 'centers': centers})
 
-     def update_joueur(self):
-         self.joueur.update()
-          self.is_shooting -= 1 if self.is_shooting > 0 else 0
+    def update_joueur(self):
+        self.joueur.update()
+        self.is_shooting -= 1 if self.is_shooting > 0 else 0
 
-     def update_tirs(self):
-          self.tirs_group.update()
+
+def update_tirs(self):
+    self.tirs_group.update()
 
 
 class MyServer(Server):
@@ -164,7 +165,7 @@ class MyServer(Server):
 
                 # drawings
                 # screen.blit(background_image, background_rect)
-                #self.draw_ships(screen)
+                # self.draw_ships(screen)
                 #self.draw_shots(screen)
                 #foes_sprites.draw(screen)
             pygame.display.flip()
