@@ -63,8 +63,8 @@ class ClientChannel(Channel):
         self.is_shooting -= 1 if self.is_shooting > 0 else 0
 
 
-def update_tirs(self):
-    self.tirs_group.update()
+    def update_tirs(self):
+        self.tirs_group.update()
 
 
 class MyServer(Server):
