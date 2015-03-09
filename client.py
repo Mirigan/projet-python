@@ -69,10 +69,8 @@ class Tir(pygame.sprite.Sprite):
 class Client(ConnectionListener):
     def __init__(self, host, port):
         self.run = False
-        try:
-         	self.Connect((host, port))
-        except:
-			sys.exit(-1)
+        self.Connect((host, port))
+
 
     def Network_connected(self, data):
         self.run = True
