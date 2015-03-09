@@ -184,23 +184,19 @@ class Joueur(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/joueur1_droite.png')
         self.rect.bottomleft = [0, 738]
-        self.speed = [0,0]
+        self.speed = [0, 0]
 
     def up(self):
-        if self.speed[1] > -5:
-            self.speed[1] -= 1
-
-    def down(self):
-        if self.speed[1] < 5:
-            self.speed[1] += 1
+        if self.rect.top > 0:
+            self.rect = self.rect.move([0, -4])
 
     def left(self):
-        if self.speed[0] > -5:
-            self.speed[0] -= 1
+        if self.rect.left > 0:
+            self.rect = self.rect.move([-4, 0])
 
     def right(self):
-        if self.speed[0] < 5:
-            self.speed[0] += 1
+        if self.rect.right < SCREEN_WIDTH:
+            self.rect = self.rect.move([4, 0])
 
     def update(self):
         self.rect = self.rect.move(self.speed)
@@ -219,7 +215,6 @@ class Tir(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.kill()
 
-
 class Ennemi(pygame.sprite.Sprite):
     """Class for the baddies"""
 
@@ -232,6 +227,8 @@ class Ennemi(pygame.sprite.Sprite):
         self.rect = self.rect.move([0, 2])
         if self.rect.top > SCREEN_HEIGHT:
             self.kill()
+
+
 # MAIN
 def main_function():
     """Main function of the game"""
