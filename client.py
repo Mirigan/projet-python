@@ -118,6 +118,17 @@ def main_function():
 	plateforme_sprite.add(plateforme)
 	plateforme = Plateforme(900,768)
 	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(0,130)
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(SCREEN_WIDTH-300,130)
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(0,0)
+	plateforme.rect.center = [SCREEN_WIDTH/2, 245]
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(100,390)
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(SCREEN_WIDTH-400,390)
+	plateforme_sprite.add(plateforme)
 	joueur_sprite = pygame.sprite.RenderClear(joueur)
 	
     
@@ -136,8 +147,8 @@ def main_function():
 					return # closing the window exits the program
 
 		if game_client.run:
-			keystrokes = pygame.key.get_pressed()
-			connection.Send({'action':'keys','keystrokes':keystrokes})
+			keys = pygame.key.get_pressed()
+			connection.Send({'action':'key','key':keys})
 
 			# updates
 			joueur_sprite.update()
