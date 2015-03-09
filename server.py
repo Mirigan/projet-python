@@ -8,6 +8,7 @@ import sys
 import pygame
 import os
 from pygame.locals import *
+from compiler.pyassem import isJump
 
 
 SCREEN_WIDTH = 1024
@@ -31,40 +32,50 @@ def load_png(name):
 
 class ClientChannel(Channel):
     def __init__(self, *args, **kwargs):
-        Channel.__init__(self, *args, **kwargs)
-        self.number = 0
-        self.is_shooting = 0
+		Channel.__init__(self, *args, **kwargs)
+		self.number = 0
+		self.is_shooting = 0
 
-        self.joueur = Joueur()
-        self.tirs_group = pygame.sprite.RenderClear()
-        plateforme = Plateforme(0, 768)
-        self.plateforme_sprite = pygame.sprite.RenderClear(plateforme)
-        list_plat.append(plateforme)
-        plateforme = Plateforme(300, 768)
-        self.plateforme_sprite.add(plateforme)
-        list_plat.append(plateforme)
-        plateforme = Plateforme(600, 768)
-        self.plateforme_sprite.add(plateforme)
-        list_plat.append(plateforme)
-        plateforme = Plateforme(900, 768)
-        self.plateforme_sprite.add(plateforme)
-        list_plat.append(plateforme)
-        plateforme = Plateforme(0, 130)
-        self.plateforme_sprite.add(plateforme)
-        list_plat.append(plateforme)
-        plateforme = Plateforme(SCREEN_WIDTH - 300, 130)
-        self.plateforme_sprite.add(plateforme)
-        list_plat.append(plateforme)
-        plateforme = Plateforme(0, 0)
-        plateforme.rect.center = [SCREEN_WIDTH / 2, 245]
-        self.plateforme_sprite.add(plateforme)
-        list_plat.append(plateforme)
-        plateforme = Plateforme(100, 390)
-        self.plateforme_sprite.add(plateforme)
-        list_plat.append(plateforme)
-        plateforme = Plateforme(SCREEN_WIDTH - 400, 390)
-        self.plateforme_sprite.add(plateforme)
-        list_plat.append(plateforme)
+		self.joueur = Joueur()
+		self.tirs_group = pygame.sprite.RenderClear()
+		plateforme = Plateforme(0, 780)
+		self.plateforme_sprite = pygame.sprite.RenderClear(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(300, 780)
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(600, 780)
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(900, 780)
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(00, 130)
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(SCREEN_WIDTH - 300, 130)
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(0, 0)
+		plateforme.rect.center = [SCREEN_WIDTH / 2, 245]
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(100, 390)
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(SCREEN_WIDTH - 400, 390)
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(0,0)
+		plateforme.rect.center = [SCREEN_WIDTH / 2, 505]
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(0, 650)
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(SCREEN_WIDTH - 300, 650)
+		self.plateforme_sprite.add(plateforme)
+		list_plat.append(plateforme)
 
 
     def Close(self):
@@ -213,44 +224,59 @@ class Joueur(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/joueur1_droite.png')
-        self.rect.bottomleft = [0, 738]
-        self.speed = [0, 6]
+        self.rect.bottomleft = [0, 750]
+        self.speed = [0, 8]
+        self.isJump = False
+        self.durationJump = 25
+        self.timeJump = 0
 
 
     def up(self):
-        if (self.collision_top(list_plat) == False):
-            if self.rect.top > 0:
-                self.rect = self.rect.move([0, -10])
+    	if self.isJump == False:
+    		self.isJump = True
+    		self.rect = self.rect.move([0, -15])
 
     def left(self):
-    	self.image = pygame.transform.flip(self.image,True,False)
+    	self.image = pygame.transform.flip(self.image, True, False)
         if (self.collision_left(list_plat) == False):
             if self.rect.left > 0:
                 self.rect = self.rect.move([-4, 0])
 
     def right(self):
-    	self.image = pygame.transform.flip(self.image,True,False)
+    	self.image = pygame.transform.flip(self.image, True, False)
         if (self.collision_right(list_plat) == False):
             if self.rect.right < SCREEN_WIDTH:
                 self.rect = self.rect.move([4, 0])
 
     def update(self):
-        if (self.collision_bot(list_plat) == False):
-            self.rect = self.rect.move(self.speed)
-            if self.rect.bottom > SCREEN_HEIGHT - 30:
-                self.rect = self.rect.move([0, -4])
+		if (self.collision_bot(list_plat) == False):
+			if self.isJump == True:
+				if self.timeJump < self.durationJump:
+					self.timeJump += 1
+					if (self.collision_top(list_plat) == False):
+						if self.rect.top > 0:
+							self.rect = self.rect.move([0, -(self.durationJump-self.timeJump)])
+						else:
+							self.timeJump = self.durationJump
+					else:
+						self.timeJump = self.durationJump
+			self.rect = self.rect.move(self.speed)
+		else:
+				self.isJump = False
+				self.timeJump = 0
+
 
     def is_under(self, platform):
-        return (pygame.Rect(self.rect.x, self.rect.y-5, self.rect.width, self.rect.height).colliderect(platform.rect))
+        return (pygame.Rect(self.rect.x, self.rect.y - 5, self.rect.width, self.rect.height).colliderect(platform.rect))
 
     def is_on(self, platform):
-        return (pygame.Rect(self.rect.x, self.rect.y+7, self.rect.width, self.rect.height).colliderect(platform.rect))
+        return (pygame.Rect(self.rect.x, self.rect.y + 7, self.rect.width, self.rect.height).colliderect(platform.rect))
 
     def is_left(self, platform):
-        return (pygame.Rect(self.rect.x+5, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))
+        return (pygame.Rect(self.rect.x + 5, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))
 
     def is_right(self, platform):
-        return (pygame.Rect(self.rect.x-3, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))
+        return (pygame.Rect(self.rect.x - 3, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))
 
     def collision_top(self, list_plat):
         for plat in list_plat:
@@ -261,6 +287,7 @@ class Joueur(pygame.sprite.Sprite):
     def collision_bot(self, list_plat):
         for plat in list_plat:
             if self.is_on(plat):
+            	self.rect.bottom = plat.rect.top;
                 return True
         return False
 

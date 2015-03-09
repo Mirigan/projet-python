@@ -37,7 +37,7 @@ class Joueur(pygame.sprite.Sprite, ConnectionListener):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/joueur1_droite.png')
-        self.rect.bottomleft = [0, 738]
+        self.rect.bottomleft = [0, 750]
     
     def Network_joueur(self,data):
         self.rect.center = data['center']
@@ -111,13 +111,13 @@ def main_function():
 	screen.blit(background_image, background_rect)
 	joueur = Joueur()
 	joueur_sprite = pygame.sprite.RenderClear(joueur)
-	plateforme = Plateforme(0, 768)
+	plateforme = Plateforme(0, 780)
 	plateforme_sprite = pygame.sprite.RenderClear(plateforme)
-	plateforme = Plateforme(300,768)
+	plateforme = Plateforme(300,780)
 	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(600,768)
+	plateforme = Plateforme(600,780)
 	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(900,768)
+	plateforme = Plateforme(900,780)
 	plateforme_sprite.add(plateforme)
 	plateforme = Plateforme(0,130)
 	plateforme_sprite.add(plateforme)
@@ -129,6 +129,13 @@ def main_function():
 	plateforme = Plateforme(100,390)
 	plateforme_sprite.add(plateforme)
 	plateforme = Plateforme(SCREEN_WIDTH-400,390)
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(0,0)
+	plateforme.rect.center = [SCREEN_WIDTH/2, 505]
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(0,650)
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(SCREEN_WIDTH-300,650)
 	plateforme_sprite.add(plateforme)
 	
 	
