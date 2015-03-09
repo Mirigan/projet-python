@@ -8,6 +8,7 @@ import sys
 import pygame
 import os
 from pygame.locals import *
+from joueur import Joueur
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
@@ -44,6 +45,24 @@ class ClientChannel(Channel):
         if (touche[K_UP]):
             self.joueur.up()
 
+        def send_joueur(self):
+
+            self.Send({'action': 'joueur', 'center': self.joueur.rect.center})
+
+        def send_tirs(self):
+            centers = []
+            sprites = self.tirs_group.sprites()
+            for sprite in sprites:
+                centers.append(sprite.rect.center)
+            self.Send({'action': 'tirs', 'length': len(sprites), 'centers': centers})
+
+        def update_joueur(self):
+            self.joueur.update()
+            self.is_shooting -= 1 if self.is_shooting > 0 else 0
+
+        def update_tirs(self):
+            self.tirs_group.update()
+
 
 class MyServer(Server):
     channelClass = ClientChannel
@@ -66,12 +85,45 @@ def __init__(self, *args, **kwargs):
         print('client deconnected')
         self.clients.remove(channel)
 
+    # SENDING FUNCTIONS
+    def send_joueurs(self):
+        for client in self.clients:
+            client.send_joueur()
+
+    def send_tirs(self):
+        for client in self.clients:
+            client.send_tirs()
+
+    def send_ennemi(self,ennemi_sprites):
+        centers = []
+        for sprite in ennemi_sprites.sprites():
+            centers.append(sprite.rect.center)
+        for channel in self.clients:
+            channel.Send({'action':'ennemi','length':len(centers),'centers':centers})
+
+# UPDATE FUNCTIONS
+    def update_joueurs(self):
+        for client in self.clients:
+            client.update_joueur()
+
+    def update_tirs(self):
+        for client in self.clients:
+            client.update_tirs()
+
+    def draw_joueurs(self,screen):
+        for client in self.clients:
+            screen.blit(client.joueur.image, client.joueur.rect)
+
+    def draw_tirs(self,screen):
+        for client in self.clients:
+            client.tirs_group.draw(screen)
+
 
 # MAIN
 def main_function():
     """Main function of the game"""
 
-    my_server = MyServer(localaddr = (sys.argv[1],int(sys.argv[2])))
+    my_server = MyServer(localaddr=(sys.argv[1], int(sys.argv[2])))
     my_server.launch_game()
 
 
