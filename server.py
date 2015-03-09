@@ -34,6 +34,10 @@ def load_png(name):
 class ClientChannel(Channel):
     def __init__(self, *args, **kwargs):
         Channel.__init__(self, *args, **kwargs)
+        self.number = 0
+        self.is_shooting = 0
+        self.joueur = Joueur()
+        self.tirs_group = pygame.sprite.RenderClear()
 
     def Close(self):
         self._server.del_client(self)
