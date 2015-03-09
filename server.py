@@ -223,11 +223,13 @@ class Joueur(pygame.sprite.Sprite):
                 self.rect = self.rect.move([0, -10])
 
     def left(self):
+    	self.image = pygame.transform.flip(self.image,True,False)
         if (self.collision_left(list_plat) == False):
             if self.rect.left > 0:
                 self.rect = self.rect.move([-4, 0])
 
     def right(self):
+    	self.image = pygame.transform.flip(self.image,True,False)
         if (self.collision_right(list_plat) == False):
             if self.rect.right < SCREEN_WIDTH:
                 self.rect = self.rect.move([4, 0])
@@ -239,10 +241,10 @@ class Joueur(pygame.sprite.Sprite):
                 self.rect = self.rect.move([0, -4])
 
     def is_under(self, platform):
-        return (pygame.Rect(self.rect.x, self.rect.y-3, self.rect.width, self.rect.height).colliderect(platform.rect))
+        return (pygame.Rect(self.rect.x, self.rect.y-5, self.rect.width, self.rect.height).colliderect(platform.rect))
 
     def is_on(self, platform):
-        return (pygame.Rect(self.rect.x, self.rect.y+5, self.rect.width, self.rect.height).colliderect(platform.rect))
+        return (pygame.Rect(self.rect.x, self.rect.y+7, self.rect.width, self.rect.height).colliderect(platform.rect))
 
     def is_left(self, platform):
         return (pygame.Rect(self.rect.x+5, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))

@@ -164,7 +164,8 @@ def main_function():
 		else: # game is not running 
 			screen.blit(wait_image, wait_rect)
 
-		pygame.display.flip()  
+		pygame.display.flip()
+		pygame.display.update()  
 
 
 if __name__ == '__main__':
