@@ -48,7 +48,6 @@ class ClientChannel(Channel):
             self.joueur.right()
         if (touche[K_UP]):
             self.joueur.up()
-        self.send_joueur()
 
     def send_joueur(self):
         self.Send({'action': 'joueur', 'center': self.joueur.rect.center})
@@ -184,7 +183,7 @@ class Joueur(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/joueur1_droite.png')
-        self.rect.center = [SCREEN_WIDTH/2, SCREEN_HEIGHT/2]
+        self.rect.bottomleft = [0, 738]
         self.speed = [0,0]
 
     def up(self):
