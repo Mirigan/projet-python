@@ -12,6 +12,7 @@ import math
 from pygame.locals import *
 from PodSixNet.Connection import connection, ConnectionListener
 import random
+from classes.joueur import Joueur
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
@@ -70,6 +71,8 @@ def main_function():
 
 	# Objects creation
 	background_image, background_rect = load_png('images/fond4.jpg')
+    joueur = Joueur()
+    
 
 	# MAIN LOOP
 	while True:
