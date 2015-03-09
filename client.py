@@ -39,7 +39,7 @@ class Joueur(pygame.sprite.Sprite, ConnectionListener):
         self.image, self.rect = load_png('images/joueur1_droite.png')
         self.rect.bottomleft = [0, 738]
     
-    def Network_Joueur(self,data):
+    def Network_joueur(self,data):
         self.rect.center = data['center']
 
     def update(self):
