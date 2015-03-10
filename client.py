@@ -118,7 +118,7 @@ class EnnemisGroup(pygame.sprite.RenderClear, ConnectionListener):
         centers = data['centers']
         if num_sprites < data['length']: # we're missing sprites
             for additional_sprite in range(data['length'] - num_sprites):
-                self.add(Ennemi(SCREEN_WIDTH,100))
+                self.add(Ennemi(0,0))
         elif num_sprites > data['length']: # we've got too many
             deleted = 0
             for sprite in self.sprites():
@@ -158,7 +158,7 @@ class Ennemis2Group(pygame.sprite.RenderClear, ConnectionListener):
         centers = data['centers']
         if num_sprites < data['length']: # we're missing sprites
             for additional_sprite in range(data['length'] - num_sprites):
-                self.add(Ennemi2(0,100))
+                self.add(Ennemi2(0,0))
         elif num_sprites > data['length']: # we've got too many
             deleted = 0
             for sprite in self.sprites():
@@ -226,7 +226,7 @@ def main_function():
 	ennemis2_sprites = Ennemis2Group()
 
 	shooting = 0
-	rythm = 240
+	rythm = 0
 	counter = 0
 	
 	plateforme = Plateforme(0, 780)
@@ -257,8 +257,8 @@ def main_function():
 	plateforme_sprite.add(plateforme)
 	
 	
-	
-    
+	pygame.mixer.music.load("sounds/music.wav")
+	pygame.mixer.music.play(-1)
 
 	# MAIN LOOP
 	while True:

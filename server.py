@@ -95,6 +95,10 @@ class MyServer(Server):
         print('Server launched')
 
     def Connected(self, channel, addr):
+        if len(self.clients) == 1:
+    		channel.joueur.rect.bottomright = [SCREEN_WIDTH,750]
+      	else:
+      		channel.adversaire.rect.bottomright = [SCREEN_WIDTH,750]
         self.clients.append(channel)
         channel.number = len(self.clients)
         print('New connection: %d client(s) connected' % len(self.clients))
@@ -191,13 +195,13 @@ class MyServer(Server):
                 if counter == rythm:
                     r = random.randint(1,4)
                     if r == 1 :
-                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH,100))
+                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+30,100))
                     elif r == 2:
-                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH,680))
+                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+30,680))
                     elif r == 3:
-                     	ennemis2_sprites.add(Ennemi2(0,100))
+                     	ennemis2_sprites.add(Ennemi2(-30,100))
                     else:
-                     	ennemis2_sprites.add(Ennemi2(0,680))
+                     	ennemis2_sprites.add(Ennemi2(-30,680))
                     counter = 0
                 ennemis_sprites.update()
                 self.send_ennemis(ennemis_sprites)
