@@ -34,13 +34,42 @@ def load_png(name):
 # CLASSES
 class Joueur(pygame.sprite.Sprite, ConnectionListener):
 
-    def __init__(self):
+    def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('images/joueur1_droite.png')
-        self.rect.bottomleft = [0, 750]
+        self.image_droite, self.rect = load_png('images/joueur1_droite.png')
+        self.image_gauche, self.rect = load_png('images/joueur1_gauche.png')
+        self.image = self.image_droite
+        self.rect.bottomleft = [x, y]
     
     def Network_joueur(self,data):
         self.rect.center = data['center']
+       
+    def Network_orientation(self, data):
+        if data['orientation']:
+            self.image=self.image_gauche
+        else:
+            self.image=self.image_droite
+
+    def update(self):
+        self.Pump()
+    
+class Adversaire(pygame.sprite.Sprite, ConnectionListener):
+
+    def __init__(self,x,y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image_droite, self.rect = load_png('images/joueur1_droite.png')
+        self.image_gauche, self.rect = load_png('images/joueur1_gauche.png')
+        self.image = self.image_droite
+        self.rect.bottomleft = [x, y]
+    
+    def Network_adversaire(self,data):
+        self.rect.center = data['center']
+    
+    def Network_orientationAdversaire(self, data):
+        if data['orientation']:
+            self.image=self.image_gauche
+        else:
+            self.image=self.image_droite
 
     def update(self):
         self.Pump()
@@ -109,8 +138,11 @@ def main_function():
 	wait_image, wait_rect = load_png('images/wait1.png')
 	wait_rect.center = background_rect.center
 	screen.blit(background_image, background_rect)
-	joueur = Joueur()
+	joueur = Joueur(0,750)
+	adversaire = Adversaire(0,750)
 	joueur_sprite = pygame.sprite.RenderClear(joueur)
+	joueur_sprite.add(adversaire)
+	
 	plateforme = Plateforme(0, 780)
 	plateforme_sprite = pygame.sprite.RenderClear(plateforme)
 	plateforme = Plateforme(300,780)
