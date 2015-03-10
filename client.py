@@ -94,6 +94,86 @@ class Tir(pygame.sprite.Sprite):
     def update(self,center):
         self.rect.center = center
 
+class Ennemi(pygame.sprite.Sprite):
+    """Class for the baddies"""
+
+    def __init__(self,x,y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/momie.png')
+        self.rect.bottomright = [x, y]
+        self.speed = self.speed = [3, 8]
+        self.isLeft = False
+
+	def update(self,center):
+		self.rect.center = center
+        
+class EnnemisGroup(pygame.sprite.RenderClear, ConnectionListener):
+    """Sprites group for the player's foes"""
+
+    def __init__(self):
+        pygame.sprite.RenderClear.__init__(self)
+
+    def Network_ennemis(self,data):
+        num_sprites = len(self.sprites())
+        centers = data['centers']
+        if num_sprites < data['length']: # we're missing sprites
+            for additional_sprite in range(data['length'] - num_sprites):
+                self.add(Ennemi(SCREEN_WIDTH,100))
+        elif num_sprites > data['length']: # we've got too many
+            deleted = 0
+            for sprite in self.sprites():
+                self.remove(sprite)
+                deleted += 1
+                if deleted == num_sprites - data['length']:
+                    break
+        indice_sprite = 0
+        for sprite in self.sprites():
+            sprite.rect.center = centers[indice_sprite]
+            indice_sprite += 1
+        
+    def update(self):
+        self.Pump()
+        
+class Ennemi2(pygame.sprite.Sprite):
+    """Class for the baddies"""
+
+    def __init__(self,x,y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/squeletterouge.png')
+        self.rect.bottomleft = [x, y]
+        self.speed = self.speed = [3, 8]
+        self.isLeft = False
+
+	def update(self,center):
+		self.rect.center = center
+        
+class Ennemis2Group(pygame.sprite.RenderClear, ConnectionListener):
+    """Sprites group for the player's foes"""
+
+    def __init__(self):
+        pygame.sprite.RenderClear.__init__(self)
+
+    def Network_ennemis2(self,data):
+        num_sprites = len(self.sprites())
+        centers = data['centers']
+        if num_sprites < data['length']: # we're missing sprites
+            for additional_sprite in range(data['length'] - num_sprites):
+                self.add(Ennemi2(0,100))
+        elif num_sprites > data['length']: # we've got too many
+            deleted = 0
+            for sprite in self.sprites():
+                self.remove(sprite)
+                deleted += 1
+                if deleted == num_sprites - data['length']:
+                    break
+        indice_sprite = 0
+        for sprite in self.sprites():
+            sprite.rect.center = centers[indice_sprite]
+            indice_sprite += 1
+        
+    def update(self):
+        self.Pump()
+
 # PODSIXNET
 class Client(ConnectionListener):
     def __init__(self, host, port):
@@ -142,6 +222,12 @@ def main_function():
 	adversaire = Adversaire(0,750)
 	joueur_sprite = pygame.sprite.RenderClear(joueur)
 	joueur_sprite.add(adversaire)
+	ennemis_sprites = EnnemisGroup()
+	ennemis2_sprites = Ennemis2Group()
+
+	shooting = 0
+	rythm = 240
+	counter = 0
 	
 	plateforme = Plateforme(0, 780)
 	plateforme_sprite = pygame.sprite.RenderClear(plateforme)
@@ -171,6 +257,7 @@ def main_function():
 	plateforme_sprite.add(plateforme)
 	
 	
+	
     
 
 	# MAIN LOOP
@@ -193,18 +280,22 @@ def main_function():
 			# updates
 			joueur_sprite.update()
 			plateforme_sprite.update()
+			ennemis_sprites.update()
+			ennemis2_sprites.update()
 
             # drawings
 			screen.blit(background_image, background_rect)
 
 			joueur_sprite.draw(screen)
 			plateforme_sprite.draw(screen)
+			ennemis_sprites.draw(screen)
+			ennemis2_sprites.draw(screen)
 
 		else: # game is not running 
 			screen.blit(wait_image, wait_rect)
 
 		pygame.display.flip()
-		pygame.display.update()  
+		  
 
 
 if __name__ == '__main__':

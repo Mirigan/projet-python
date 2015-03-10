@@ -7,6 +7,7 @@ import time
 import sys
 import pygame
 import os
+import random
 from pygame.locals import *
 from compiler.pyassem import isJump
 
@@ -97,7 +98,7 @@ class MyServer(Server):
         self.clients.append(channel)
         channel.number = len(self.clients)
         print('New connection: %d client(s) connected' % len(self.clients))
-        if len(self.clients) == 1:
+        if len(self.clients) == 2:
             self.run = True
             '''wheels_image, wheels_rect = load_png('images/wheels.png')'''
             '''self.screen.blit(wheels_image, wheels_rect)'''
@@ -119,12 +120,19 @@ class MyServer(Server):
         for client in self.clients:
             client.send_tirs()
 
-    def send_ennemi(self, ennemi_sprites):
+    def send_ennemis(self, ennemis_sprites):
         centers = []
-        for sprite in ennemi_sprites.sprites():
+        for sprite in ennemis_sprites.sprites():
             centers.append(sprite.rect.center)
         for channel in self.clients:
-            channel.Send({'action': 'ennemi', 'length': len(centers), 'centers': centers})
+            channel.Send({'action': 'ennemis', 'length': len(centers), 'centers': centers})
+    
+    def send_ennemis2(self, ennemis2_sprites):
+        centers = []
+        for sprite in ennemis2_sprites.sprites():
+            centers.append(sprite.rect.center)
+        for channel in self.clients:
+            channel.Send({'action': 'ennemis2', 'length': len(centers), 'centers': centers})
 
         # UPDATE FUNCTIONS
 
@@ -154,10 +162,11 @@ class MyServer(Server):
         # Elements
         wait_image, wait_rect = load_png('images/wait.png')
         self.screen.blit(wait_image, wait_rect)
-        ennemi_sprites = pygame.sprite.RenderClear()
+        ennemis_sprites = pygame.sprite.RenderClear()
+        ennemis2_sprites = pygame.sprite.RenderClear()
 
         shooting = 0
-        rythm = 60
+        rythm = 90
         counter = 0
 
         while True:
@@ -171,7 +180,7 @@ class MyServer(Server):
 
                 # updates
                 for channel in self.clients:
-                    pygame.sprite.groupcollide(ennemi_sprites, channel.tirs_group, True, True,
+                    pygame.sprite.groupcollide(ennemis_sprites, channel.tirs_group, True, True,
                                                pygame.sprite.collide_circle_ratio(0.7))
                 self.update_joueurs()
                 self.send_joueurs()
@@ -180,11 +189,20 @@ class MyServer(Server):
                 self.send_tirs()
                 counter += 1
                 if counter == rythm:
-                    ennemi_sprites.add(Ennemi())
+                    r = random.randint(1,4)
+                    if r == 1 :
+                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH,100))
+                    elif r == 2:
+                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH,680))
+                    elif r == 3:
+                     	ennemis2_sprites.add(Ennemi2(0,100))
+                    else:
+                     	ennemis2_sprites.add(Ennemi2(0,680))
                     counter = 0
-                    rythm -= 1 if rythm > 10 else 0
-                ennemi_sprites.update()
-                self.send_ennemi(ennemi_sprites)
+                ennemis_sprites.update()
+                self.send_ennemis(ennemis_sprites)
+                ennemis2_sprites.update()
+                self.send_ennemis2(ennemis2_sprites)
 
             # drawings
             # screen.blit(background_image, background_rect)
@@ -357,16 +375,58 @@ class Tir(pygame.sprite.Sprite):
 class Ennemi(pygame.sprite.Sprite):
     """Class for the baddies"""
 
-    def __init__(self):
+    def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/momie.png')
-        self.rect.center = [0, 0]
+        self.rect.bottomright = [x, y]
+        self.speed = [-3, 0]
+        self.gravity = [0, 6]
+        self.isLeft = False
 
     def update(self):
-        self.rect = self.rect.move([0, 2])
-        if self.rect.top > SCREEN_HEIGHT:
-            self.kill()
+        self.rect = self.rect.move(self.speed)
+        if self.collision_bot(list_plat) == False:
+        	self.rect = self.rect.move(self.gravity)
+        if self.rect.right < 0:
+                self.kill()
+        	
+    def is_on(self, platform):
+        return (pygame.Rect(self.rect.x, self.rect.y + 5, self.rect.width, self.rect.height).colliderect(platform.rect))
 
+    def collision_bot(self, list_plat):
+        for plat in list_plat:
+            if self.is_on(plat):
+            	self.rect.bottom = plat.rect.top;
+                return True
+        return False
+
+class Ennemi2(pygame.sprite.Sprite):
+    """Class for the baddies"""
+
+    def __init__(self,x,y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/squeletterouge.png')
+        self.rect.bottomleft = [x, y]
+        self.speed = [3, 0]
+        self.gravity = [0, 6]
+        self.isLeft = False
+
+    def update(self):
+        self.rect = self.rect.move(self.speed)
+        if self.collision_bot(list_plat) == False:
+        	self.rect = self.rect.move(self.gravity)
+        if self.rect.left > SCREEN_WIDTH:
+                self.kill()
+        	
+    def is_on(self, platform):
+        return (pygame.Rect(self.rect.x, self.rect.y + 5, self.rect.width, self.rect.height).colliderect(platform.rect))
+
+    def collision_bot(self, list_plat):
+        for plat in list_plat:
+            if self.is_on(plat):
+            	self.rect.bottom = plat.rect.top;
+                return True
+        return False
 
 # MAIN
 def main_function():
