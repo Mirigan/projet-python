@@ -257,7 +257,7 @@ def main_function():
 	plateforme_sprite.add(plateforme)
 	
 	
-	pygame.mixer.music.load("sounds/music.wav")
+	pygame.mixer.music.load("sounds/bg_music.wav")
 	pygame.mixer.music.play(-1)
 
 	# MAIN LOOP
