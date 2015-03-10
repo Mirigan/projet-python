@@ -57,8 +57,8 @@ class Adversaire(pygame.sprite.Sprite, ConnectionListener):
 
     def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
-        self.image_droite, self.rect = load_png('images/joueur1_droite.png')
-        self.image_gauche, self.rect = load_png('images/joueur1_gauche.png')
+        self.image_droite, self.rect = load_png('images/joueur2_droite.png')
+        self.image_gauche, self.rect = load_png('images/joueur2_gauche.png')
         self.image = self.image_droite
         self.rect.bottomleft = [x, y]
     
