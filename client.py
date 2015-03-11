@@ -89,7 +89,7 @@ class Tir(pygame.sprite.Sprite):
 
 	def __init__(self):
 		pygame.sprite.Sprite.__init__(self)
-		self.image, self.rect = load_png('images/grenade.png')
+		self.image, self.rect = load_png('images/tir.png')
 
 	def update(self,center):
 		self.rect.center = center
@@ -237,7 +237,7 @@ def main_function():
 	pygame.key.set_repeat(1,1)
 
 	# Objects creation
-	background_image, background_rect = load_png('images/fond4.jpg')
+	background_image, background_rect = load_png('images/fond1.png')
 	wait_image, wait_rect = load_png('images/wait1.png')
 	wait_rect.center = background_rect.center
 	screen.blit(background_image, background_rect)
@@ -254,31 +254,31 @@ def main_function():
 	rythm = 0
 	counter = 0
 
-	plateforme = Plateforme(0, 780)
+	plateforme = Plateforme(0, 770)
 	plateforme_sprite = pygame.sprite.RenderClear(plateforme)
-	plateforme = Plateforme(300,780)
+	plateforme = Plateforme(300,770)
 	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(600,780)
+	plateforme = Plateforme(600,770)
 	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(900,780)
+	plateforme = Plateforme(900,770)
 	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(0,130)
+	plateforme = Plateforme(0,120)
 	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(SCREEN_WIDTH-300,130)
-	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(0,0)
-	plateforme.rect.center = [SCREEN_WIDTH/2, 245]
-	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(100,390)
-	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(SCREEN_WIDTH-400,390)
+	plateforme = Plateforme(SCREEN_WIDTH-300,120)
 	plateforme_sprite.add(plateforme)
 	plateforme = Plateforme(0,0)
-	plateforme.rect.center = [SCREEN_WIDTH/2, 505]
+	plateforme.rect.center = [SCREEN_WIDTH/2, 240]
 	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(0,650)
+	plateforme = Plateforme(100,380)
 	plateforme_sprite.add(plateforme)
-	plateforme = Plateforme(SCREEN_WIDTH-300,650)
+	plateforme = Plateforme(SCREEN_WIDTH-400,380)
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(0,0)
+	plateforme.rect.center = [SCREEN_WIDTH/2, 630]
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(0,510)
+	plateforme_sprite.add(plateforme)
+	plateforme = Plateforme(SCREEN_WIDTH-300,510)
 	plateforme_sprite.add(plateforme)
 
 

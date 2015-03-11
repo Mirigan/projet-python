@@ -62,7 +62,7 @@ class ClientChannel(Channel):
             if self.is_shooting == 0:
             	tir = Tir(self.joueur.rect.center)
             	tir.isLeft = self.joueur.isLeft
-                self.tirs_group.add(tir)
+                self._server.tirs_sprites.add(tir)
                 self.is_shooting = 40
 
     def send_joueur(self):
@@ -127,8 +127,11 @@ class MyServer(Server):
             client.send_adversaire()
 
     def send_tirs(self):
-        for client in self.clients:
-            client.send_tirs()
+		centers = []
+		for sprite in self.tirs_sprites.sprites():
+			centers.append(sprite.rect.center)
+		for channel in self.clients:
+			channel.Send({'action': 'tirs', 'length': len(centers), 'centers': centers})
 
     def send_ennemis(self, ennemis_sprites):
         centers = []
@@ -151,8 +154,7 @@ class MyServer(Server):
             client.update_joueurs()
 
     def update_tirs(self):
-        for client in self.clients:
-            client.update_tirs()
+        self.tirs_sprites.update()
 
     def draw_joueurs(self, screen):
         for client in self.clients:
@@ -174,6 +176,7 @@ class MyServer(Server):
         self.screen.blit(wait_image, wait_rect)
         ennemis_sprites = pygame.sprite.RenderClear()
         ennemis2_sprites = pygame.sprite.RenderClear()
+        self.tirs_sprites = pygame.sprite.RenderClear()
 
         shooting = 0
         rythm = 90
@@ -187,11 +190,11 @@ class MyServer(Server):
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         return
+                       
+                pygame.sprite.groupcollide(ennemis_sprites, self.tirs_sprites, True, True)
+                pygame.sprite.groupcollide(ennemis2_sprites, self.tirs_sprites, True, True)
 
                 # updates
-                for channel in self.clients:
-                    pygame.sprite.groupcollide(ennemis_sprites, channel.tirs_group, True, True)
-                    pygame.sprite.groupcollide(ennemis2_sprites, channel.tirs_group, True, True)
                 self.update_joueurs()
                 self.send_joueurs()
                 self.send_adversaires()
@@ -222,31 +225,31 @@ class MyServer(Server):
             pygame.display.flip()
             
     def platforme(self):
-		plateforme = Plateforme(0, 780)
+		plateforme = Plateforme(0, 770)
 		list_plat.append(plateforme)
-		plateforme = Plateforme(300, 780)
+		plateforme = Plateforme(300, 770)
 		list_plat.append(plateforme)
-		plateforme = Plateforme(600, 780)
+		plateforme = Plateforme(600, 770)
 		list_plat.append(plateforme)
-		plateforme = Plateforme(900, 780)
+		plateforme = Plateforme(900, 770)
 		list_plat.append(plateforme)
-		plateforme = Plateforme(00, 130)
+		plateforme = Plateforme(00, 120)
 		list_plat.append(plateforme)
-		plateforme = Plateforme(SCREEN_WIDTH - 300, 130)
-		list_plat.append(plateforme)
-		plateforme = Plateforme(0, 0)
-		plateforme.rect.center = [SCREEN_WIDTH / 2, 245]
-		list_plat.append(plateforme)
-		plateforme = Plateforme(100, 390)
-		list_plat.append(plateforme)
-		plateforme = Plateforme(SCREEN_WIDTH - 400, 390)
+		plateforme = Plateforme(SCREEN_WIDTH - 300, 120)
 		list_plat.append(plateforme)
 		plateforme = Plateforme(0, 0)
-		plateforme.rect.center = [SCREEN_WIDTH / 2, 505]
+		plateforme.rect.center = [SCREEN_WIDTH / 2, 240]
 		list_plat.append(plateforme)
-		plateforme = Plateforme(0, 650)
+		plateforme = Plateforme(100, 380)
 		list_plat.append(plateforme)
-		plateforme = Plateforme(SCREEN_WIDTH - 300, 650)
+		plateforme = Plateforme(SCREEN_WIDTH-400, 380)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(0, 0)
+		plateforme.rect.center = [SCREEN_WIDTH / 2, 630]
+		list_plat.append(plateforme)
+		plateforme = Plateforme(0, 510)
+		list_plat.append(plateforme)
+		plateforme = Plateforme(SCREEN_WIDTH - 300, 510)
 		list_plat.append(plateforme)
 	
     def updateAdversaire(self, channel):
@@ -309,10 +312,10 @@ class Joueur(pygame.sprite.Sprite):
 
 
     def is_under(self, platform):
-        return (pygame.Rect(self.rect.x, self.rect.y - 5, self.rect.width, self.rect.height).colliderect(platform.rect))
+        return (pygame.Rect(self.rect.x, self.rect.y - 7, self.rect.width, self.rect.height).colliderect(platform.rect))
 
     def is_on(self, platform):
-        return (pygame.Rect(self.rect.x, self.rect.y + 7, self.rect.width, self.rect.height).colliderect(platform.rect))
+        return (pygame.Rect(self.rect.x, self.rect.y + 9, self.rect.width, self.rect.height).colliderect(platform.rect))
 
     def is_left(self, platform):
         return (pygame.Rect(self.rect.x + 6, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))
@@ -373,17 +376,19 @@ class Tir(pygame.sprite.Sprite):
 
     def __init__(self, position):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('images/grenade.png')
+        self.image, self.rect = load_png('images/tir.png')
         self.rect.center = position
         self.isLeft = False
 
     def update(self):
     	if self.isLeft:
-        	self.rect = self.rect.move([-8, 0])
+        	self.rect = self.rect.move([-10, 0])
         else:
-        	self.rect = self.rect.move([8, 0])
-        if self.rect.top < 0:
+        	self.rect = self.rect.move([10, 0])
+        if self.rect.right < 0:
             self.kill()
+        if self.rect.left>SCREEN_WIDTH:
+        	self.kill()
 
 
 class Ennemi(pygame.sprite.Sprite):
