@@ -105,7 +105,7 @@ class TirsGroup(pygame.sprite.RenderClear, ConnectionListener):
 		centers = data['centers']
 		if num_sprites < data['length']: # we're missing sprites
 			for additional_sprite in range(data['length'] - num_sprites):
-				self.add(Tir())
+				self.add(Tir())				
 		elif num_sprites > data['length']: # we've got too many
 			deleted = 0
 			for sprite in self.sprites():
@@ -206,21 +206,14 @@ class Client(ConnectionListener):
 	def __init__(self, host, port):
 		self.run = False
 		self.Connect((host, port))
-
-
-	def Network_connected(self, data):
-		self.run = True
-		print('client connecte au serveur !')
-		
-
-	### Network event/message callbacks ###
-	def Network_connected(self, data):
-		print('connecte au serveur')
-		self.run = True
 	
 	def Network_mort(self, data):
 		print('GAME OVER !')
 		print('Score : '+str(data['score']))
+		sys.exit(0)
+	
+	def Network_full(self, data):
+		print('Serveur complet !')
 		sys.exit(0)
 
 	def Network_error(self, data):
@@ -230,6 +223,12 @@ class Client(ConnectionListener):
 	def Network_disconnected(self, data):
 		print 'Server disconnected'
 		sys.exit()
+	
+	def Network_run(self,data):
+		self.run = data['run']
+	
+	def Network_son(self,data):
+		pygame.mixer.Sound(data['son']).play()
 
 # MAIN
 def main_function():
@@ -287,7 +286,7 @@ def main_function():
 	plateforme_sprite.add(plateforme)
 
 
-	pygame.mixer.music.load("sounds/bg_music.wav")
+	pygame.mixer.music.load("sounds/theme.wav")
 	pygame.mixer.music.play(-1)
 
 	# MAIN LOOP

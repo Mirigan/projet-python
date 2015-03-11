@@ -63,6 +63,8 @@ class ClientChannel(Channel):
             if self.is_shooting == 0:
             	tir = Tir(self.joueur.rect.center)
             	tir.isLeft = self.joueur.isLeft
+            	for client in self._server.clients:
+            		client.Send({'action': 'son', 'son': 'sounds/gun.wav'})
                 self._server.tirs_sprites.add(tir)
                 self.is_shooting = 30
 
@@ -91,7 +93,6 @@ class ClientChannel(Channel):
 class MyServer(Server):
     channelClass = ClientChannel
 
-
     def __init__(self, *args, **kwargs):
         Server.__init__(self, *args, **kwargs)
         self.clients = []
@@ -102,21 +103,32 @@ class MyServer(Server):
         print('Server launched')
 
     def Connected(self, channel, addr):
-        if len(self.clients) == 1:
-    		channel.joueur.rect.bottomright = [SCREEN_WIDTH,750]
-      	else:
-      		channel.adversaire.rect.bottomright = [SCREEN_WIDTH,750]
-        self.clients.append(channel)
-        channel.number = len(self.clients)
-        print('New connection: %d client(s) connected' % len(self.clients))
-        if len(self.clients) == 2:
-            self.run = True
-            '''wheels_image, wheels_rect = load_png('images/wheels.png')'''
-            '''self.screen.blit(wheels_image, wheels_rect)'''
+    	self.clients.append(channel)
+    	if len(self.clients) == 3:
+    		channel.Send({'action': 'full', 'full': True})
+    		self.clients.remove(channel)
+    	else:
+	        if len(self.clients) == 1:
+	    		channel.joueur.rect.bottomright = [SCREEN_WIDTH/2-100,750]
+	    		channel.adversaire.rect.bottomright = [SCREEN_WIDTH/2+100,750]
+	      	else:
+	      		channel.joueur.rect.bottomright = [SCREEN_WIDTH/2+100,750]
+	    		channel.adversaire.rect.bottomright = [SCREEN_WIDTH/2-100,750]
+	        channel.number = len(self.clients)
+	        print('New connection: %d client(s) connected' % len(self.clients))
+	        if len(self.clients) == 2:
+	            self.run = True
+	            for client in self.clients:
+	            	client.Send({'action': 'run', 'run': True})
+	            '''wheels_image, wheels_rect = load_png('images/wheels.png')'''
+	            '''self.screen.blit(wheels_image, wheels_rect)'''
 
     def del_client(self, channel):
         print('client deconnected')
         self.clients.remove(channel)
+        for client in self.clients:
+       			client.Send({'action': 'run', 'run': False})
+       			self.run = False
 
     # SENDING FUNCTIONS
     def send_joueurs(self):
@@ -181,7 +193,7 @@ class MyServer(Server):
 
         shooting = 0
         rythm = 90
-        counter = 0
+        counter = -300
         score = 0
 
         while True:
@@ -197,9 +209,13 @@ class MyServer(Server):
                 	score+=1
                 if pygame.sprite.groupcollide(ennemis2_sprites, self.tirs_sprites, True, True):
                 	score+=1
-                for client in self.clients:
+                '''for client in self.clients:
                 	if pygame.sprite.groupcollide(ennemis_sprites, client.joueur_sprites, False, True):
-                		client.Send({'action': 'mort','score':score})
+                		for c in self.clients:
+                		 	c.Send({'action': 'mort','score':score})
+                	if pygame.sprite.groupcollide(ennemis2_sprites, client.joueur_sprites, False, True):
+                		for c in self.clients:
+                		 	c.Send({'action': 'mort','score':score})'''
                 
                 if score == 5:
                 	rythm=80	
