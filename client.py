@@ -126,7 +126,7 @@ class Ennemi(pygame.sprite.Sprite):
 
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
-		self.image, self.rect = load_png('images/momie.png')
+		self.image, self.rect = load_png('images/enemy_gauche.png')
 		self.rect.center = [x, y]
 		self.speed = self.speed = [3, 8]
 		self.isLeft = False
@@ -166,7 +166,7 @@ class Ennemi2(pygame.sprite.Sprite):
 
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
-		self.image, self.rect = load_png('images/squeletterouge.png')
+		self.image, self.rect = load_png('images/enemy_droite.png')
 		self.rect.bottomleft = [x, y]
 		self.speed = self.speed = [3, 8]
 		self.isLeft = False

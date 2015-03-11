@@ -190,8 +190,8 @@ class MyServer(Server):
 
                 # updates
                 for channel in self.clients:
-                    pygame.sprite.groupcollide(ennemis_sprites, channel.tirs_group, True, True,
-                                               pygame.sprite.collide_circle_ratio(0.7))
+                    pygame.sprite.groupcollide(ennemis_sprites, channel.tirs_group, True, True)
+                    pygame.sprite.groupcollide(ennemis2_sprites, channel.tirs_group, True, True)
                 self.update_joueurs()
                 self.send_joueurs()
                 self.send_adversaires()
@@ -201,13 +201,13 @@ class MyServer(Server):
                 if counter == rythm:
                     r = random.randint(1,4)
                     if r == 1 :
-                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+30,100))
+                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+10,100))
                     elif r == 2:
-                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+30,680))
+                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+10,680))
                     elif r == 3:
-                     	ennemis2_sprites.add(Ennemi2(-30,100))
+                     	ennemis2_sprites.add(Ennemi2(-10,100))
                     else:
-                     	ennemis2_sprites.add(Ennemi2(-30,680))
+                     	ennemis2_sprites.add(Ennemi2(-10,680))
                     counter = 0
                 ennemis_sprites.update()
                 self.send_ennemis(ennemis_sprites)
@@ -391,7 +391,7 @@ class Ennemi(pygame.sprite.Sprite):
 
     def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('images/momie.png')
+        self.image, self.rect = load_png('images/enemy_gauche.png')
         self.rect.bottomright = [x, y]
         self.speed = [-3, 0]
         self.gravity = [0, 6]
@@ -419,7 +419,7 @@ class Ennemi2(pygame.sprite.Sprite):
 
     def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('images/squeletterouge.png')
+        self.image, self.rect = load_png('images/enemy_droite.png')
         self.rect.bottomleft = [x, y]
         self.speed = [3, 0]
         self.gravity = [0, 6]
