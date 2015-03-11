@@ -60,8 +60,10 @@ class ClientChannel(Channel):
         self._server.updateAdversaire(self)
         if(touche[K_SPACE]):
             if self.is_shooting == 0:
-                self.tirs_group.add(Tir(self.joueur.rect.center))
-                self.is_shooting = 10
+            	tir = Tir(self.joueur.rect.center)
+            	tir.isLeft = self.joueur.isLeft
+                self.tirs_group.add(tir)
+                self.is_shooting = 40
 
     def send_joueur(self):
         self.Send({'action': 'joueur', 'center': self.joueur.rect.center})
@@ -373,9 +375,13 @@ class Tir(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/grenade.png')
         self.rect.center = position
+        self.isLeft = False
 
     def update(self):
-        self.rect = self.rect.move([10, 0])
+    	if self.isLeft:
+        	self.rect = self.rect.move([-8, 0])
+        else:
+        	self.rect = self.rect.move([8, 0])
         if self.rect.top < 0:
             self.kill()
 

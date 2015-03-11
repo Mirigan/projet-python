@@ -127,7 +127,7 @@ class Ennemi(pygame.sprite.Sprite):
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image, self.rect = load_png('images/momie.png')
-		self.rect.bottomright = [x, y]
+		self.rect.center = [x, y]
 		self.speed = self.speed = [3, 8]
 		self.isLeft = False
 
@@ -211,9 +211,7 @@ class Client(ConnectionListener):
 	def Network_connected(self, data):
 		self.run = True
 		print('client connecte au serveur !')
-
-	def Network(self, data):
-		print('message de type %s recu' % data['action'])
+		
 
 	### Network event/message callbacks ###
 	def Network_connected(self, data):
