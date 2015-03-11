@@ -220,7 +220,7 @@ class Client(ConnectionListener):
 	
 	def Network_mort(self, data):
 		print('GAME OVER !')
-		print('Score : '+data['score'])
+		print('Score : '+str(data['score']))
 		sys.exit(0)
 
 	def Network_error(self, data):
