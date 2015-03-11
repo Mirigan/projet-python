@@ -39,8 +39,9 @@ class ClientChannel(Channel):
 		self.is_shooting = 0
 
 		self.joueur = Joueur(0, 750)
+		self.joueur_sprites = pygame.sprite.RenderClear(self.joueur)
 		self.adversaire = Adversaire(0, 750)
-		self.tirs_group = pygame.sprite.RenderClear()
+		
 
 
     def Close(self):
@@ -63,7 +64,7 @@ class ClientChannel(Channel):
             	tir = Tir(self.joueur.rect.center)
             	tir.isLeft = self.joueur.isLeft
                 self._server.tirs_sprites.add(tir)
-                self.is_shooting = 40
+                self.is_shooting = 30
 
     def send_joueur(self):
         self.Send({'action': 'joueur', 'center': self.joueur.rect.center})
@@ -181,6 +182,7 @@ class MyServer(Server):
         shooting = 0
         rythm = 90
         counter = 0
+        score = 0
 
         while True:
             clock.tick(60)
@@ -191,8 +193,22 @@ class MyServer(Server):
                     if event.type == pygame.QUIT:
                         return
                        
-                pygame.sprite.groupcollide(ennemis_sprites, self.tirs_sprites, True, True)
-                pygame.sprite.groupcollide(ennemis2_sprites, self.tirs_sprites, True, True)
+                if pygame.sprite.groupcollide(ennemis_sprites, self.tirs_sprites, True, True):
+                	score+=1
+                if pygame.sprite.groupcollide(ennemis2_sprites, self.tirs_sprites, True, True):
+                	score+=1
+                for client in self.clients:
+                	if pygame.sprite.groupcollide(ennemis_sprites, client.joueur_sprites, False, True):
+                		client.Send({'action': 'mort','score':score})
+                
+                if score == 5:
+                	rythm=80	
+                if score == 10:
+                	rythm=70	
+                if score == 15:
+                	rythm=60
+                if score == 20:
+                	rythm=30
 
                 # updates
                 self.update_joueurs()
@@ -201,16 +217,20 @@ class MyServer(Server):
                 self.update_tirs()
                 self.send_tirs()
                 counter += 1
-                if counter == rythm:
-                    r = random.randint(1,4)
+                if counter >= rythm:
+                    r = random.randint(1,6)
                     if r == 1 :
                      	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+10,100))
                     elif r == 2:
-                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+10,680))
+                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+10,500))
                     elif r == 3:
+                     	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+10,750))
+                    elif r == 4:
                      	ennemis2_sprites.add(Ennemi2(-10,100))
+                    elif r == 5:
+                     	ennemis2_sprites.add(Ennemi2(-10,500))
                     else:
-                     	ennemis2_sprites.add(Ennemi2(-10,680))
+                     	ennemis2_sprites.add(Ennemi2(-10,750))                     	
                     counter = 0
                 ennemis_sprites.update()
                 self.send_ennemis(ennemis_sprites)

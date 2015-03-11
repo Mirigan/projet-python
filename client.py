@@ -217,6 +217,11 @@ class Client(ConnectionListener):
 	def Network_connected(self, data):
 		print('connecte au serveur')
 		self.run = True
+	
+	def Network_mort(self, data):
+		print('GAME OVER !')
+		print('Score : '+data['score'])
+		sys.exit(0)
 
 	def Network_error(self, data):
 		print 'error:', data['error'][1]
