@@ -209,13 +209,13 @@ class MyServer(Server):
                 	score+=1
                 if pygame.sprite.groupcollide(ennemis2_sprites, self.tirs_sprites, True, True):
                 	score+=1
-                for client in self.clients:
+                '''for client in self.clients:
                 	if pygame.sprite.groupcollide(ennemis_sprites, client.joueur_sprites, False, True):
                 		for c in self.clients:
                 		 	c.Send({'action': 'mort','score':score})
                 	if pygame.sprite.groupcollide(ennemis2_sprites, client.joueur_sprites, False, True):
                 		for c in self.clients:
-                		 	c.Send({'action': 'mort','score':score})
+                		 	c.Send({'action': 'mort','score':score})'''
                 
                 if score == 5:
                 	rythm=80	
