@@ -15,6 +15,7 @@ from compiler.pyassem import isJump
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
 list_plat = []
+life = 5
 
 # FUNCTIONS
 def load_png(name):
@@ -61,7 +62,10 @@ class ClientChannel(Channel):
         self._server.updateAdversaire(self)
         if(touche[K_SPACE]):
             if self.is_shooting == 0:
-            	tir = Tir(self.joueur.rect.center)
+            	if self.joueur.isLeft:
+            		tir = Tir((self.joueur.rect.centerx-13,self.joueur.rect.centery-8))
+            	else:
+            		tir = Tir((self.joueur.rect.centerx+13,self.joueur.rect.centery-8))
             	tir.isLeft = self.joueur.isLeft
             	for client in self._server.clients:
             		client.Send({'action': 'son', 'son': 'sounds/gun.wav'})
@@ -97,7 +101,9 @@ class MyServer(Server):
         Server.__init__(self, *args, **kwargs)
         self.clients = []
         self.run = False
+        self.fin = False
         pygame.init()
+        self.platforme_sprite = pygame.sprite.RenderClear()
         self.screen = pygame.display.set_mode((128, 128))
         self.platforme()
         print('Server launched')
@@ -129,6 +135,8 @@ class MyServer(Server):
         for client in self.clients:
        			client.Send({'action': 'run', 'run': False})
        			self.run = False
+       	if len(self.clients) == 0 and self.fin:
+       		sys.exit(0)
 
     # SENDING FUNCTIONS
     def send_joueurs(self):
@@ -191,10 +199,11 @@ class MyServer(Server):
         ennemis2_sprites = pygame.sprite.RenderClear()
         self.tirs_sprites = pygame.sprite.RenderClear()
 
-        shooting = 0
         rythm = 90
-        counter = -300
+        counter = -1200
         score = 0
+        
+        global life
 
         while True:
             clock.tick(60)
@@ -205,27 +214,7 @@ class MyServer(Server):
                     if event.type == pygame.QUIT:
                         return
                        
-                if pygame.sprite.groupcollide(ennemis_sprites, self.tirs_sprites, True, True):
-                	score+=1
-                if pygame.sprite.groupcollide(ennemis2_sprites, self.tirs_sprites, True, True):
-                	score+=1
-                for client in self.clients:
-                	if pygame.sprite.groupcollide(ennemis_sprites, client.joueur_sprites, False, True):
-                		for c in self.clients:
-                		 	c.Send({'action': 'mort','score':score})
-                	if pygame.sprite.groupcollide(ennemis2_sprites, client.joueur_sprites, False, True):
-                		for c in self.clients:
-                		 	c.Send({'action': 'mort','score':score})
-                
-                if score == 5:
-                	rythm=80	
-                if score == 10:
-                	rythm=70	
-                if score == 15:
-                	rythm=60
-                if score == 20:
-                	rythm=30
-
+                pygame.sprite.groupcollide(self.platforme_sprite, self.tirs_sprites, False, True)
                 # updates
                 self.update_joueurs()
                 self.send_joueurs()
@@ -233,6 +222,9 @@ class MyServer(Server):
                 self.update_tirs()
                 self.send_tirs()
                 counter += 1
+                if counter==-300:
+                	for c in self.clients:
+						c.Send({'action': 'regles', 'regles':False})
                 if counter >= rythm:
                     r = random.randint(1,6)
                     if r == 1 :
@@ -252,6 +244,46 @@ class MyServer(Server):
                 self.send_ennemis(ennemis_sprites)
                 ennemis2_sprites.update()
                 self.send_ennemis2(ennemis2_sprites)
+                
+                if pygame.sprite.groupcollide(ennemis_sprites, self.tirs_sprites, True, True):
+					score += 1
+					for c in self.clients:
+						c.Send({'action': 'score', 'score':score})
+                if pygame.sprite.groupcollide(ennemis2_sprites, self.tirs_sprites, True, True):
+					score += 1
+					for c in self.clients:
+						c.Send({'action': 'score', 'score':score})
+                for client in self.clients:
+					if pygame.sprite.groupcollide(ennemis_sprites, client.joueur_sprites, True, False):
+						life -= 1
+					if pygame.sprite.groupcollide(ennemis2_sprites, client.joueur_sprites, True, False):
+						life -= 1
+
+                for c in self.clients:							
+					c.Send({'action': 'life', 'life':life})
+						 	
+                if life <= 0:
+                	self.run = False
+                	self.fin = True
+                	for c in self.clients:
+						c.Send({'action': 'mort', 'mort':True})
+				
+                if score == 5:
+					rythm=80
+					for c in self.clients:
+						 	c.Send({'action': 'difficulty', 'difficulty':'Easy'})	
+                if score == 10:
+					rythm=70
+					for c in self.clients:
+						 	c.Send({'action': 'difficulty', 'difficulty':'Medium'})	
+                if score == 15:
+					rythm=60
+					for c in self.clients:
+						 	c.Send({'action': 'difficulty', 'difficulty':'Hard'})	
+                if score == 20:
+					rythm=30
+					for c in self.clients:
+						 	c.Send({'action': 'difficulty', 'difficulty':'Very Hard'})	
 
             # drawings
             # screen.blit(background_image, background_rect)
@@ -263,30 +295,42 @@ class MyServer(Server):
     def platforme(self):
 		plateforme = Plateforme(0, 770)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(300, 770)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(600, 770)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(900, 770)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(00, 120)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(SCREEN_WIDTH - 300, 120)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(0, 0)
 		plateforme.rect.center = [SCREEN_WIDTH / 2, 240]
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(100, 380)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(SCREEN_WIDTH-400, 380)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(0, 0)
 		plateforme.rect.center = [SCREEN_WIDTH / 2, 630]
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(0, 510)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 		plateforme = Plateforme(SCREEN_WIDTH - 300, 510)
 		list_plat.append(plateforme)
+		self.platforme_sprite.add(plateforme)
 	
     def updateAdversaire(self, channel):
 		for c in self.clients:
@@ -443,7 +487,9 @@ class Ennemi(pygame.sprite.Sprite):
         if self.collision_bot(list_plat) == False:
         	self.rect = self.rect.move(self.gravity)
         if self.rect.right < 0:
-                self.kill()
+        	global life
+        	life -= 1
+        	self.kill()
         	
     def is_on(self, platform):
         return (pygame.Rect(self.rect.x, self.rect.y + 5, self.rect.width, self.rect.height).colliderect(platform.rect))
@@ -471,7 +517,9 @@ class Ennemi2(pygame.sprite.Sprite):
         if self.collision_bot(list_plat) == False:
         	self.rect = self.rect.move(self.gravity)
         if self.rect.left > SCREEN_WIDTH:
-                self.kill()
+        	global life
+        	life -= 1
+        	self.kill()
         	
     def is_on(self, platform):
         return (pygame.Rect(self.rect.x, self.rect.y + 5, self.rect.width, self.rect.height).colliderect(platform.rect))
