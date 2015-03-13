@@ -30,3 +30,9 @@ Fleche du haut : Saut
 Fleche de droite : mouvement a droite
 Fleche de gauche : mouvement a gauche
 Barre d'espace : Tir
+
+///Jeu réalisé par:
+Emilien Billard
+Romain Gourier
+Kévin Traineau
+Claire Poimboeuf

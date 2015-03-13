@@ -29,3 +29,9 @@ Up Arrow : Jump
 Right Arrow : move right
 Left Arrow : move left
 Spacebar : Shoot
+
+///Game by:
+Emilien Billard
+Romain Gourier
+Kévin Traineau
+Claire Poimboeuf

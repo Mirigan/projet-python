@@ -12,7 +12,6 @@ import random
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
 
-# FUNCTIONS
 def load_png(name):
 	fullname=os.path.join('.',name)
 	try:
@@ -26,8 +25,8 @@ def load_png(name):
 		raise SystemExit, message
 	return image,image.get_rect()
 
-# CLASSES
 class Joueur(pygame.sprite.Sprite, ConnectionListener):
+	''' Le joueur utilisé par le client'''
 
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
@@ -37,9 +36,11 @@ class Joueur(pygame.sprite.Sprite, ConnectionListener):
 		self.rect.bottomleft = [x, y]
 
 	def Network_joueur(self,data):
+		'''Permet de modifier la position du joueur'''
 		self.rect.center = data['center']
 
 	def Network_orientation(self, data):
+		''' Permet de modifier l'orientation du joueur en fonction du déplacement (gauche/droite)'''
 		if data['orientation']:
 			self.image=self.image_gauche
 		else:
@@ -49,6 +50,7 @@ class Joueur(pygame.sprite.Sprite, ConnectionListener):
 		self.Pump()
 
 class Joueur2(pygame.sprite.Sprite, ConnectionListener):
+	''' Le joueur utilisé par le second client'''
 
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
@@ -58,9 +60,11 @@ class Joueur2(pygame.sprite.Sprite, ConnectionListener):
 		self.rect.bottomleft = [x, y]
 
 	def Network_joueur2(self,data):
+		'''Permet de modifier la position du second joueur'''
 		self.rect.center = data['center']
 
 	def Network_orientationJoueur2(self, data):
+		''' Permet de modifier l'orientation du second joueur en fonction du déplacement (gauche/droite)'''
 		if data['orientation']:
 			self.image=self.image_gauche
 		else:
@@ -70,6 +74,7 @@ class Joueur2(pygame.sprite.Sprite, ConnectionListener):
 		self.Pump()
 
 class Plateforme(pygame.sprite.Sprite, ConnectionListener):
+	''' Une plateforme '''
 
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
@@ -80,7 +85,7 @@ class Plateforme(pygame.sprite.Sprite, ConnectionListener):
 		self.Pump()
 
 class Tir(pygame.sprite.Sprite):
-
+	" Un tir "
 	def __init__(self):
 		pygame.sprite.Sprite.__init__(self)
 		self.image, self.rect = load_png('images/tir.png')
@@ -89,17 +94,19 @@ class Tir(pygame.sprite.Sprite):
 		self.rect.center = center
 
 class TirsGroup(pygame.sprite.RenderClear, ConnectionListener):
-
+	''' Le groupe contenant tous les tirs '''
 	def __init__(self):
 		pygame.sprite.RenderClear.__init__(self)
 
 	def Network_tirs(self,data):
 		num_sprites = len(self.sprites())
 		centers = data['centers']
-		if num_sprites < data['length']: # we're missing sprites
+		if num_sprites < data['length']: 
+			'''Ajoute de nouveaux tirs'''
 			for additional_sprite in range(data['length'] - num_sprites):
 				self.add(Tir())				
-		elif num_sprites > data['length']: # we've got too many
+		elif num_sprites > data['length']: 
+			'''Supprime les tirs en trop'''
 			deleted = 0
 			for sprite in self.sprites():
 				self.remove(sprite)
@@ -108,6 +115,7 @@ class TirsGroup(pygame.sprite.RenderClear, ConnectionListener):
 					break
 		indice_sprite = 0
 		for sprite in self.sprites():
+			'''Met à jour la position des tirs'''
 			sprite.update(centers[indice_sprite])
 			indice_sprite += 1
 
@@ -115,7 +123,7 @@ class TirsGroup(pygame.sprite.RenderClear, ConnectionListener):
 		self.Pump()
 
 class Ennemi(pygame.sprite.Sprite):
-
+	''' Un ennemi '''
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image, self.rect = load_png('images/enemy_gauche.png')
@@ -127,6 +135,7 @@ class Ennemi(pygame.sprite.Sprite):
 		self.rect.center = center
 
 class EnnemisGroup(pygame.sprite.RenderClear, ConnectionListener):
+	''' Le groupe contenant le premier type d'ennemis '''
 
 	def __init__(self):
 		pygame.sprite.RenderClear.__init__(self)
@@ -134,10 +143,12 @@ class EnnemisGroup(pygame.sprite.RenderClear, ConnectionListener):
 	def Network_ennemis(self,data):
 		num_sprites = len(self.sprites())
 		centers = data['centers']
-		if num_sprites < data['length']: # we're missing sprites
+		if num_sprites < data['length']:
+			'''Ajoute de nouveaux ennemis'''
 			for additional_sprite in range(data['length'] - num_sprites):
 				self.add(Ennemi(0,0))
-		elif num_sprites > data['length']: # we've got too many
+		elif num_sprites > data['length']:
+			'''Supprime les ennemis en trop'''
 			deleted = 0
 			for sprite in self.sprites():
 				self.remove(sprite)
@@ -146,6 +157,7 @@ class EnnemisGroup(pygame.sprite.RenderClear, ConnectionListener):
 					break
 		indice_sprite = 0
 		for sprite in self.sprites():
+			'''Met à jour la position des ennemis'''
 			sprite.rect.center = centers[indice_sprite]
 			indice_sprite += 1
 
@@ -153,7 +165,7 @@ class EnnemisGroup(pygame.sprite.RenderClear, ConnectionListener):
 		self.Pump()
 
 class Ennemi2(pygame.sprite.Sprite):
-
+	''' Un second type d'ennemi '''
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image, self.rect = load_png('images/enemy_droite.png')
@@ -165,17 +177,19 @@ class Ennemi2(pygame.sprite.Sprite):
 		self.rect.center = center
 
 class Ennemis2Group(pygame.sprite.RenderClear, ConnectionListener):
-
+	''' Le groupe contenant le second type d'ennemis '''
 	def __init__(self):
 		pygame.sprite.RenderClear.__init__(self)
 
 	def Network_ennemis2(self,data):
 		num_sprites = len(self.sprites())
 		centers = data['centers']
-		if num_sprites < data['length']: # we're missing sprites
+		if num_sprites < data['length']:
+			'''Ajoute de nouveaux ennemis'''
 			for additional_sprite in range(data['length'] - num_sprites):
 				self.add(Ennemi2(0,0))
-		elif num_sprites > data['length']: # we've got too many
+		elif num_sprites > data['length']:
+			'''Supprime les ennemis en trop'''
 			deleted = 0
 			for sprite in self.sprites():
 				self.remove(sprite)
@@ -184,13 +198,13 @@ class Ennemis2Group(pygame.sprite.RenderClear, ConnectionListener):
 					break
 		indice_sprite = 0
 		for sprite in self.sprites():
+			'''Met à jour la position des ennemis'''
 			sprite.rect.center = centers[indice_sprite]
 			indice_sprite += 1
 
 	def update(self):
 		self.Pump()
 
-# PODSIXNET
 class Client(ConnectionListener):
 	def __init__(self, host, port):
 		self.run = False
@@ -202,11 +216,13 @@ class Client(ConnectionListener):
 		self.Connect((host, port))
 	
 	def Network_mort(self, data):
+		'''Met fin au jeu'''
 		print('GAME OVER !')
 		print('Score : '+str(self.score))
 		self.mort = data['mort']
 	
 	def Network_full(self, data):
+		'''Ferme le programme quand le server est complet'''
 		print('Server full !')
 		sys.exit(0)
 
@@ -219,33 +235,42 @@ class Client(ConnectionListener):
 		sys.exit()
 	
 	def Network_run(self,data):
+		'''Indique s'il y a 2 joueurs de connecté au server ou non'''
 		self.run = data['run']
 	
 	def Network_son(self,data):
+		'''Joue le son en parametre'''
 		pygame.mixer.Sound(data['son']).play()
 	
 	def Network_score(self,data):
+		'''Met à jour le score'''
 		self.score = data['score']
 	
 	def Network_life(self,data):
+		'''Met à jour le nombre de vies restantes'''
 		self.life = data['life']
 	
 	def Network_difficulty(self,data):
+		'''Met à jour la difficulté'''
 		self.difficulty = data['difficulty']
 
 	def Network_regles(self,data):
+		'''Indique si les regles doivent êtres affichées ou non'''
 		self.regles = data['regles']
-# MAIN
+
 def main_function():
 
-	# Initialization
-	game_client = Client(sys.argv[1], int(sys.argv[2]))
+	try:
+		game_client = Client(sys.argv[1], int(sys.argv[2]))
+	except:
+		print('Syntaxe: python client.py <IP server> <port server>')
+		sys.exit(-1)
 	pygame.init()
 	screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 	clock = pygame.time.Clock()
 	pygame.key.set_repeat(1,1)
 
-	# Objects creation
+	'''Création des objet'''
 	background_image, background_rect = load_png('images/fond.png')
 	wait_image, wait_rect = load_png('images/wait1.png')
 	wait_rect.center = background_rect.center
@@ -263,10 +288,7 @@ def main_function():
 	ennemis2_sprites = Ennemis2Group()
 	tirs_sprites = TirsGroup()
 
-	shooting = 0
-	rythm = 0
-	counter = 0
-
+	'''Initialisation des plateformes'''
 	plateforme = Plateforme(0, 770)
 	plateforme_sprite = pygame.sprite.RenderClear(plateforme)
 	plateforme = Plateforme(300,770)
@@ -294,10 +316,11 @@ def main_function():
 	plateforme = Plateforme(SCREEN_WIDTH-300,510)
 	plateforme_sprite.add(plateforme)
 
-
+	'''Lancement de la music de fond'''
 	pygame.mixer.music.load("sounds/theme.wav")
 	pygame.mixer.music.play(-1)
 	
+	'''Initialisation de l'affichage (score, vie, difficulté)'''
 	font = pygame.font.Font(None, 36)
 	life=5
 	score=0
@@ -316,22 +339,20 @@ def main_function():
  	screen.blit(textLife, lifePos)
 
 
-	# MAIN LOOP
 	while game_client.mort == False:
-		clock.tick(60) # max speed is 60 frames per second
+		clock.tick(60) 
 		connection.Pump()
 		game_client.Pump()
 
 		if game_client.run:
 
-			# Events handling
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
-					return # closing the window exits the program
+					return
 		if game_client.run:
 			keys = pygame.key.get_pressed()
 			connection.Send({'action':'key','key':keys})
-			# updates
+
 			joueur_sprite.update()
 			plateforme_sprite.update()
 			ennemis_sprites.update()
@@ -339,8 +360,9 @@ def main_function():
 			tirs_sprites.update()
 
 
-			# drawings
+
 			screen.blit(background_image, background_rect)
+			'''Met à jour l'affichage si les valeurs ont changées'''
 			if score != game_client.score:
 				score=game_client.score
 				textScore = font.render("Score : "+str(score), 1, (255, 255, 255))
@@ -363,10 +385,11 @@ def main_function():
 			ennemis2_sprites.draw(screen)
 			tirs_sprites.draw(screen)
 
-		else: # game is not running
+		else:
 			screen.blit(wait_image, wait_rect)
 		pygame.display.flip()
-		
+	
+	'''Mise en place de l'écran de fin'''
 	font = pygame.font.Font(None, 74)
 	textScore = font.render("Score : "+str(score), 1, (255, 255, 255))
 	textRetry = font.render("Better luck next time", 1, (255, 255, 255))
