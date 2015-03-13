@@ -113,7 +113,6 @@ class MyServer(Server):
     	self.clients.append(channel)
     	if len(self.clients) == 3:
     		channel.Send({'action': 'full', 'full': True})
-    		self.clients.remove(channel)
     	else:
 	        if len(self.clients) == 1:
 	    		channel.joueur.rect.bottomright = [SCREEN_WIDTH/2-100,750]
@@ -131,13 +130,16 @@ class MyServer(Server):
 	            	client.Send({'action': 'run', 'run': True})
 
     def del_client(self, channel):
-        print('client deconnected')
-        self.clients.remove(channel)
-        for client in self.clients:
-       			client.Send({'action': 'run', 'run': False})
-       			self.run = False
-       	if len(self.clients) == 0 and self.fin:
-       		sys.exit(0)
+    	if len(self.clients) == 3:
+    		self.clients.remove(channel)
+    	else:
+        	print('client deconnected')
+	        self.clients.remove(channel)
+	        for client in self.clients:
+	       			client.Send({'action': 'run', 'run': False})
+	       			self.run = False
+	       	if len(self.clients) == 0 and self.fin:
+	       		sys.exit(0)
 
     # SENDING FUNCTIONS
     def send_joueurs(self):

@@ -207,7 +207,7 @@ class Client(ConnectionListener):
 		self.mort = data['mort']
 	
 	def Network_full(self, data):
-		print('Serveur complet !')
+		print('Server full !')
 		sys.exit(0)
 
 	def Network_error(self, data):
