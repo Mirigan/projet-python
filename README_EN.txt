@@ -2,6 +2,10 @@ Platform game with 2 players. The goal is to survive as much as possible and to 
 
 /// WARNING : this game is created for a 1024x768 window. Please don't touch it.
 
+Launch the game with the syntax : 
+server.py 127.0.0.1 8888
+client.py 127.0.0.1 8888
+
 /// Rules :
 ¤ A team of 2 players
 ¤ 5 shared lifes for both player

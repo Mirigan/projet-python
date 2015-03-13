@@ -2,6 +2,10 @@ Jeu de plateforme à 2 joueurs dont le but et de survive le plus longtemps en emp
 
 /// ATTENTION : ce jeu est conçu pour une fenêtre de jeu de 1024x768. Merci de ne pas toucher a ces valeurs.
 
+Lancer le jeu avec la syntaxe :
+server.py 127.0.0.1 8888
+client.py 127.0.0.1 8888
+
 /// Règles du jeu :
 ¤ Une équipe de 2 joueurs
 ¤ 5 vies communes pour les 2 joueurs 
