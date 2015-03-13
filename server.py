@@ -19,7 +19,7 @@ life = 5
 
 # FUNCTIONS
 def load_png(name):
-    """Load image and return image object"""
+
     fullname = os.path.join('.', name)
     try:
         image = pygame.image.load(fullname)
@@ -41,7 +41,7 @@ class ClientChannel(Channel):
 
 		self.joueur = Joueur(0, 750)
 		self.joueur_sprites = pygame.sprite.RenderClear(self.joueur)
-		self.adversaire = Adversaire(0, 750)
+		self.joueur2 = Joueur2(0, 750)
 		
 
 
@@ -59,7 +59,7 @@ class ClientChannel(Channel):
         if (touche[K_UP]):
             self.joueur.up()
         self.Send({'action': 'orientation', 'orientation':self.joueur.isLeft})
-        self._server.updateAdversaire(self)
+        self._server.updateJoueur2(self)
         if(touche[K_SPACE]):
             if self.is_shooting == 0:
             	if self.joueur.isLeft:
@@ -75,8 +75,8 @@ class ClientChannel(Channel):
     def send_joueur(self):
         self.Send({'action': 'joueur', 'center': self.joueur.rect.center})
         
-    def send_adversaire(self):
-        self.Send({'action': 'adversaire', 'center': self.adversaire.rect.center})
+    def send_joueur2(self):
+        self.Send({'action': 'joueur2', 'center': self.joueur2.rect.center})
 
     def send_tirs(self):
         centers = []
@@ -102,6 +102,7 @@ class MyServer(Server):
         self.clients = []
         self.run = False
         self.fin = False
+        self.counter = -1200
         pygame.init()
         self.platforme_sprite = pygame.sprite.RenderClear()
         self.screen = pygame.display.set_mode((128, 128))
@@ -116,18 +117,18 @@ class MyServer(Server):
     	else:
 	        if len(self.clients) == 1:
 	    		channel.joueur.rect.bottomright = [SCREEN_WIDTH/2-100,750]
-	    		channel.adversaire.rect.bottomright = [SCREEN_WIDTH/2+100,750]
+	    		channel.joueur2.rect.bottomright = [SCREEN_WIDTH/2+100,750]
 	      	else:
 	      		channel.joueur.rect.bottomright = [SCREEN_WIDTH/2+100,750]
-	    		channel.adversaire.rect.bottomright = [SCREEN_WIDTH/2-100,750]
+	    		channel.joueur2.rect.bottomright = [SCREEN_WIDTH/2-100,750]
 	        channel.number = len(self.clients)
 	        print('New connection: %d client(s) connected' % len(self.clients))
 	        if len(self.clients) == 2:
+	            if self.counter>=-300:
+	            	channel.Send({'action': 'regles', 'regles':False})
 	            self.run = True
 	            for client in self.clients:
 	            	client.Send({'action': 'run', 'run': True})
-	            '''wheels_image, wheels_rect = load_png('images/wheels.png')'''
-	            '''self.screen.blit(wheels_image, wheels_rect)'''
 
     def del_client(self, channel):
         print('client deconnected')
@@ -143,9 +144,9 @@ class MyServer(Server):
         for client in self.clients:
             client.send_joueur()
     
-    def send_adversaires(self):
+    def send_joueur2(self):
         for client in self.clients:
-            client.send_adversaire()
+            client.send_joueur2()
 
     def send_tirs(self):
 		centers = []
@@ -200,7 +201,6 @@ class MyServer(Server):
         self.tirs_sprites = pygame.sprite.RenderClear()
 
         rythm = 90
-        counter = -1200
         score = 0
         
         global life
@@ -218,14 +218,14 @@ class MyServer(Server):
                 # updates
                 self.update_joueurs()
                 self.send_joueurs()
-                self.send_adversaires()
+                self.send_joueur2()
                 self.update_tirs()
                 self.send_tirs()
-                counter += 1
-                if counter==-300:
+                self.counter += 1
+                if self.counter==-300:
                 	for c in self.clients:
 						c.Send({'action': 'regles', 'regles':False})
-                if counter >= rythm:
+                if self.counter >= rythm:
                     r = random.randint(1,6)
                     if r == 1 :
                      	ennemis_sprites.add(Ennemi(SCREEN_WIDTH+10,100))
@@ -239,7 +239,7 @@ class MyServer(Server):
                      	ennemis2_sprites.add(Ennemi2(-10,500))
                     else:
                      	ennemis2_sprites.add(Ennemi2(-10,750))                     	
-                    counter = 0
+                    self.counter = 0
                 ennemis_sprites.update()
                 self.send_ennemis(ennemis_sprites)
                 ennemis2_sprites.update()
@@ -268,19 +268,19 @@ class MyServer(Server):
                 	for c in self.clients:
 						c.Send({'action': 'mort', 'mort':True})
 				
-                if score == 5:
+                if score == 50:
 					rythm=80
 					for c in self.clients:
 						 	c.Send({'action': 'difficulty', 'difficulty':'Easy'})	
-                if score == 10:
+                if score == 100:
 					rythm=70
 					for c in self.clients:
 						 	c.Send({'action': 'difficulty', 'difficulty':'Medium'})	
-                if score == 15:
+                if score == 150:
 					rythm=60
 					for c in self.clients:
 						 	c.Send({'action': 'difficulty', 'difficulty':'Hard'})	
-                if score == 20:
+                if score == 200:
 					rythm=30
 					for c in self.clients:
 						 	c.Send({'action': 'difficulty', 'difficulty':'Very Hard'})	
@@ -332,18 +332,17 @@ class MyServer(Server):
 		list_plat.append(plateforme)
 		self.platforme_sprite.add(plateforme)
 	
-    def updateAdversaire(self, channel):
+    def updateJoueur2(self, channel):
 		for c in self.clients:
 			if c != channel:
-				c.adversaire.rect.center = channel.joueur.rect.center
-				c.adversaire.isLeft = channel.joueur.isLeft
-				c.Send({'action': 'orientationAdversaire', 'orientation':c.adversaire.isLeft})
+				c.joueur2.rect.center = channel.joueur.rect.center
+				c.joueur2.isLeft = channel.joueur.isLeft
+				c.Send({'action': 'orientationJoueur2', 'orientation':c.joueur2.isLeft})
 
 
             
 # CLASSES
 class Joueur(pygame.sprite.Sprite):
-    """Class for the player's ship"""
 
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -428,8 +427,7 @@ class Joueur(pygame.sprite.Sprite):
                 return True
         return False
 
-class Adversaire(pygame.sprite.Sprite):
-    """Class for the player's ship"""
+class Joueur2(pygame.sprite.Sprite):
 
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -443,7 +441,6 @@ class Adversaire(pygame.sprite.Sprite):
 
 
 class Plateforme(pygame.sprite.Sprite):
-    """Classe des Plateformes"""
 
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -452,8 +449,7 @@ class Plateforme(pygame.sprite.Sprite):
 
 
 class Tir(pygame.sprite.Sprite):
-    """Class for the player's shots"""
-
+	
     def __init__(self, position):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/tir.png')
@@ -472,7 +468,6 @@ class Tir(pygame.sprite.Sprite):
 
 
 class Ennemi(pygame.sprite.Sprite):
-    """Class for the baddies"""
 
     def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
@@ -502,7 +497,6 @@ class Ennemi(pygame.sprite.Sprite):
         return False
 
 class Ennemi2(pygame.sprite.Sprite):
-    """Class for the baddies"""
 
     def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
@@ -533,7 +527,6 @@ class Ennemi2(pygame.sprite.Sprite):
 
 # MAIN
 def main_function():
-    """Main function of the game"""
 
     my_server = MyServer(localaddr=(sys.argv[1], int(sys.argv[2])))
     my_server.launch_game()

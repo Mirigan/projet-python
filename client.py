@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-	Very simple game with Pygame
-"""
-
 import sys, pygame
 import os
 import time
@@ -18,7 +14,6 @@ SCREEN_HEIGHT = 768
 
 # FUNCTIONS
 def load_png(name):
-	"""Load image and return image object"""
 	fullname=os.path.join('.',name)
 	try:
 		image=pygame.image.load(fullname)
@@ -53,7 +48,7 @@ class Joueur(pygame.sprite.Sprite, ConnectionListener):
 	def update(self):
 		self.Pump()
 
-class Adversaire(pygame.sprite.Sprite, ConnectionListener):
+class Joueur2(pygame.sprite.Sprite, ConnectionListener):
 
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
@@ -62,10 +57,10 @@ class Adversaire(pygame.sprite.Sprite, ConnectionListener):
 		self.image = self.image_droite
 		self.rect.bottomleft = [x, y]
 
-	def Network_adversaire(self,data):
+	def Network_joueur2(self,data):
 		self.rect.center = data['center']
 
-	def Network_orientationAdversaire(self, data):
+	def Network_orientationJoueur2(self, data):
 		if data['orientation']:
 			self.image=self.image_gauche
 		else:
@@ -75,7 +70,6 @@ class Adversaire(pygame.sprite.Sprite, ConnectionListener):
 		self.Pump()
 
 class Plateforme(pygame.sprite.Sprite, ConnectionListener):
-	"""Classe des Plateformes"""
 
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
@@ -95,7 +89,6 @@ class Tir(pygame.sprite.Sprite):
 		self.rect.center = center
 
 class TirsGroup(pygame.sprite.RenderClear, ConnectionListener):
-	"""Sprites group for the player's shot"""
 
 	def __init__(self):
 		pygame.sprite.RenderClear.__init__(self)
@@ -122,7 +115,6 @@ class TirsGroup(pygame.sprite.RenderClear, ConnectionListener):
 		self.Pump()
 
 class Ennemi(pygame.sprite.Sprite):
-	"""Class for the baddies"""
 
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
@@ -135,7 +127,6 @@ class Ennemi(pygame.sprite.Sprite):
 		self.rect.center = center
 
 class EnnemisGroup(pygame.sprite.RenderClear, ConnectionListener):
-	"""Sprites group for the player's foes"""
 
 	def __init__(self):
 		pygame.sprite.RenderClear.__init__(self)
@@ -162,7 +153,6 @@ class EnnemisGroup(pygame.sprite.RenderClear, ConnectionListener):
 		self.Pump()
 
 class Ennemi2(pygame.sprite.Sprite):
-	"""Class for the baddies"""
 
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
@@ -175,7 +165,6 @@ class Ennemi2(pygame.sprite.Sprite):
 		self.rect.center = center
 
 class Ennemis2Group(pygame.sprite.RenderClear, ConnectionListener):
-	"""Sprites group for the player's foes"""
 
 	def __init__(self):
 		pygame.sprite.RenderClear.__init__(self)
@@ -248,7 +237,7 @@ class Client(ConnectionListener):
 		self.regles = data['regles']
 # MAIN
 def main_function():
-	"""Main function of the game"""
+
 	# Initialization
 	game_client = Client(sys.argv[1], int(sys.argv[2]))
 	pygame.init()
@@ -262,14 +251,14 @@ def main_function():
 	wait_rect.center = background_rect.center
 	gameOver_image, gameOver_rect = load_png('images/game_over.png')
 	gameOver_rect.center = background_rect.center
-	regles_image, regles_rect = load_png('images/game_over.png')
+	regles_image, regles_rect = load_png('images/rules.png')
 	regles_rect.center = background_rect.center
 	screen.blit(background_image, background_rect)
 	joueur = Joueur(0,750)
-	adversaire = Adversaire(0,750)
+	joueur2 = Joueur2(0,750)
 
 	joueur_sprite = pygame.sprite.RenderClear(joueur)
-	joueur_sprite.add(adversaire)
+	joueur_sprite.add(joueur2)
 	ennemis_sprites = EnnemisGroup()
 	ennemis2_sprites = Ennemis2Group()
 	tirs_sprites = TirsGroup()
