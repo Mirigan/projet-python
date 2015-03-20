@@ -50,25 +50,43 @@ class Joueur(pygame.sprite.Sprite, ConnectionListener):
 		self.Pump()
 
 class Joueur2(pygame.sprite.Sprite, ConnectionListener):
-	''' Le joueur utilisé par le second client'''
+	''' Les joueurs utilisés par les autres clients'''
 
-	def __init__(self,x,y):
+	def __init__(self):
 		pygame.sprite.Sprite.__init__(self)
 		self.image_droite, self.rect = load_png('images/joueur2_droite.png')
 		self.image_gauche, self.rect = load_png('images/joueur2_gauche.png')
 		self.image = self.image_droite
-		self.rect.bottomleft = [x, y]
+		
+class Joueur2Group(pygame.sprite.RenderClear, ConnectionListener):
+	''' Le groupe contenant tous les autres joueurs '''
+	def __init__(self):
+		pygame.sprite.RenderClear.__init__(self)
 
 	def Network_joueur2(self,data):
-		'''Permet de modifier la position du second joueur'''
-		self.rect.center = data['center']
-
-	def Network_orientationJoueur2(self, data):
-		''' Permet de modifier l'orientation du second joueur en fonction du déplacement (gauche/droite)'''
-		if data['orientation']:
-			self.image=self.image_gauche
-		else:
-			self.image=self.image_droite
+		num_sprites = len(self.sprites())
+		joueur2 = data['joueur2']
+		if num_sprites < data['length']: 
+			'''Ajoute de nouveaux joueurs'''
+			for additional_sprite in range(data['length'] - num_sprites):
+				self.add(Joueur2())				
+		elif num_sprites > data['length']: 
+			'''Supprime les joueurs en trop'''
+			deleted = 0
+			for sprite in self.sprites():
+				self.remove(sprite)
+				deleted += 1
+				if deleted == num_sprites - data['length']:
+					break
+		indice_sprite = 0
+		for sprite in self.sprites():
+			'''Met à jour la position des autres joueurs'''
+			sprite.rect.center =[joueur2[indice_sprite][0],joueur2[indice_sprite][1]] 
+			if joueur2[indice_sprite][2]:
+				sprite.image=sprite.image_gauche
+			else:
+				sprite.image=sprite.image_droite
+			indice_sprite += 1
 
 	def update(self):
 		self.Pump()
@@ -280,10 +298,9 @@ def main_function():
 	regles_rect.center = background_rect.center
 	screen.blit(background_image, background_rect)
 	joueur = Joueur(0,750)
-	joueur2 = Joueur2(0,750)
 
 	joueur_sprite = pygame.sprite.RenderClear(joueur)
-	joueur_sprite.add(joueur2)
+	joueur2_sprites = Joueur2Group()
 	ennemis_sprites = EnnemisGroup()
 	ennemis2_sprites = Ennemis2Group()
 	tirs_sprites = TirsGroup()
@@ -333,7 +350,7 @@ def main_function():
  	difficultyPos = textDifficulty.get_rect()
  	difficultyPos.centerx = SCREEN_WIDTH/2
  	lifePos = textLife.get_rect()
- 	lifePos.right = SCREEN_WIDTH-10
+ 	lifePos.right = SCREEN_WIDTH-50
  	screen.blit(textScore, scorePos)
  	screen.blit(textDifficulty, difficultyPos)
  	screen.blit(textLife, lifePos)
@@ -355,6 +372,7 @@ def main_function():
 
 			joueur_sprite.update()
 			plateforme_sprite.update()
+			joueur2_sprites.update()
 			ennemis_sprites.update()
 			ennemis2_sprites.update()
 			tirs_sprites.update()
@@ -380,6 +398,7 @@ def main_function():
 			plateforme_sprite.draw(screen)
 			if game_client.regles:
 				screen.blit(regles_image, regles_rect)
+			joueur2_sprites.draw(screen)
 			joueur_sprite.draw(screen)
 			ennemis_sprites.draw(screen)
 			ennemis2_sprites.draw(screen)

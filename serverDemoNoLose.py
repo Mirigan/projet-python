@@ -274,11 +274,11 @@ class MyServer(Server):
 					c.Send({'action': 'life', 'life':life})
 				
 				'''Indique aux clients que la partie est finie s'ils n'ont plus de vie'''
-				if life <= 0:
+				'''if life <= 0:
 					self.run = False
 					self.fin = True
 					for c in self.clients:
-						c.Send({'action': 'mort', 'mort':True})
+						c.Send({'action': 'mort', 'mort':True})'''
 				
 				'''Augmente le niveau de difficulte (vitesse d'apparition des ennemi) en fonction du score'''
 				if score == 5:

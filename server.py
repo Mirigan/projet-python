@@ -40,7 +40,7 @@ class ClientChannel(Channel):
 		'''Création des joueurs'''
 		self.joueur = Joueur(0, 750)
 		self.joueur_sprites = pygame.sprite.RenderClear(self.joueur)
-		self.joueur2 = Joueur2(0, 750)
+		self.joueur2 = pygame.sprite.RenderClear()
 		
 
 
@@ -116,39 +116,28 @@ class MyServer(Server):
 
 	def Connected(self, channel, addr):
 		self.clients.append(channel)
-		if len(self.clients) == 3:
-			'''Indique au client que le serveur est complet'''
-			channel.Send({'action': 'full', 'full': True})
-		else:
-			'''Définie la position de départ des joueur'''
-			if len(self.clients) == 1:
-				channel.joueur.rect.bottomright = [SCREEN_WIDTH/2-100,750]
-				channel.joueur2.rect.bottomright = [SCREEN_WIDTH/2+100,750]
-		  	else:
-		  		channel.joueur.rect.bottomright = [SCREEN_WIDTH/2+100,750]
-				channel.joueur2.rect.bottomright = [SCREEN_WIDTH/2-100,750]
-			channel.number = len(self.clients)
-			print('New connection: %d client(s) connected' % len(self.clients))
-			'''Indique aux clients que le jeu est lancé'''
-			if len(self.clients) == 2:
-				if self.counter>=-300:
-					channel.Send({'action': 'regles', 'regles':False})
-				self.run = True
-				for client in self.clients:
-					client.Send({'action': 'run', 'run': True})
+		'''Définie la position de départ des joueur'''
+		channel.joueur.rect.bottomright = [SCREEN_WIDTH/2,750]
+		channel.number = len(self.clients)
+		print('New connection: %d client(s) connected' % len(self.clients))
+		'''Indique aux clients que le jeu est lancé'''
+		if len(self.clients) >= 2:
+			if self.counter>=-300:
+				channel.Send({'action': 'regles', 'regles':False})
+			self.run = True
+			for client in self.clients:
+				client.Send({'action': 'run', 'run': True})
 
 	def del_client(self, channel):
-		if len(self.clients) == 3:
-			self.clients.remove(channel)
-		else:
-			print('client deconnected')
-			self.clients.remove(channel)
+		print('client deconnected')
+		self.clients.remove(channel)
+		if len(self.clients) == 1:
+			self.run = False
 			for client in self.clients:
-		   			client.Send({'action': 'run', 'run': False})
-		   			self.run = False
-		   	'''Arrete le serveur si la partie est terminé et que tout les clients ce sont déconnectés'''
-		   	if len(self.clients) == 0 and self.fin:
-		   		sys.exit(0)
+			   	client.Send({'action': 'run', 'run': False})
+		'''Arrete le serveur si la partie est terminé et que tout les clients ce sont déconnectés'''
+		if len(self.clients) == 0 and self.fin:
+		   	sys.exit(0)
 
 	def send_joueurs(self):
 		'''Envoi leur position a tous les joueurs'''
@@ -156,9 +145,12 @@ class MyServer(Server):
 			client.send_joueur()
 	
 	def send_joueur2(self):
-		'''Envoi à tous les joueurs la position de l'autre joueur'''
+		'''Envoi à tous les joueurs la position des autres joueurs'''
 		for client in self.clients:
-			client.send_joueur2()
+			joueur2 = []
+			for sprite in client.joueur2.sprites():
+				joueur2.append((sprite.rect.centerx,sprite.rect.centery,sprite.isLeft))
+			client.Send({'action': 'joueur2', 'length': len(joueur2), 'joueur2': joueur2})
 
 	def send_tirs(self):
 		'''Envoi la position des tirs a tous les joueurs'''
@@ -293,18 +285,26 @@ class MyServer(Server):
 					rythm=80
 					for c in self.clients:
 						 	c.Send({'action': 'difficulty', 'difficulty':'Easy'})	
-				if score == 100:
+				elif score == 100:
 					rythm=70
 					for c in self.clients:
 						 	c.Send({'action': 'difficulty', 'difficulty':'Medium'})	
-				if score == 150:
+				elif score == 150:
 					rythm=60
 					for c in self.clients:
 						 	c.Send({'action': 'difficulty', 'difficulty':'Hard'})	
-				if score == 200:
+				elif score == 250:
 					rythm=30
 					for c in self.clients:
-						 	c.Send({'action': 'difficulty', 'difficulty':'Very Hard'})	
+						 	c.Send({'action': 'difficulty', 'difficulty':'Very Hard'})
+				elif score == 350:
+					rythm=20
+					for c in self.clients:
+						 	c.Send({'action': 'difficulty', 'difficulty':'Insane'})	
+				elif score == 450:
+					rythm=10
+					for c in self.clients:
+						 	c.Send({'action': 'difficulty', 'difficulty':'Impossible'})		
 
 			pygame.display.flip()
 			
@@ -350,12 +350,29 @@ class MyServer(Server):
 		self.platforme_sprite.add(plateforme)
 	
 	def updateJoueur2(self, channel):
-		'''Récupere la position et l'orientation d'un joueur et l'envoi a l'autre joueur'''
+		'''Récupere les positions et orientations des autres joueurs'''
+		j2 = []
 		for c in self.clients:
 			if c != channel:
-				c.joueur2.rect.center = channel.joueur.rect.center
-				c.joueur2.isLeft = channel.joueur.isLeft
-				c.Send({'action': 'orientationJoueur2', 'orientation':c.joueur2.isLeft})
+				j2.append(c.joueur)
+		if len(channel.joueur2.sprites()) < len(j2):
+			'''Ajoute de nouveaux joueurs'''
+			for additional_sprite in range(len(j2) - len(channel.joueur2.sprites())):
+				channel.joueur2.add(Joueur2(0,0))
+		elif len(channel.joueur2.sprites()) > len(j2):
+			'''Supprime les joueurs en trop'''
+			deleted = 0
+			for sprite in channel.joueur2.sprites():
+				channel.joueur2.remove(sprite)
+				deleted += 1
+				if deleted == len(channel.joueur2.sprites()) - len(j2):
+					break
+		indice_sprite = 0
+		for sprite in channel.joueur2.sprites():
+			'''Met à jour la position des joueurs et leur orientation'''
+			sprite.rect = j2[indice_sprite].rect
+			sprite.isLeft = j2[indice_sprite].isLeft
+			indice_sprite += 1
 
 
 			
@@ -414,7 +431,7 @@ class Joueur(pygame.sprite.Sprite):
 
 	def is_under(self, platform):
 		'''Verifie si le joueur touche le bas d'une plateforme'''
-		return (pygame.Rect(self.rect.x, self.rect.y - 7, self.rect.width, self.rect.height).colliderect(platform.rect))
+		return (pygame.Rect(self.rect.x, self.rect.y - 9, self.rect.width, self.rect.height).colliderect(platform.rect))
 
 	def is_on(self, platform):
 		'''Verifie si le joueur touche le haut d'une plateforme'''
@@ -426,7 +443,7 @@ class Joueur(pygame.sprite.Sprite):
 
 	def is_right(self, platform):
 		'''Verifie si le joueur touche la droite d'une plateforme'''
-		return (pygame.Rect(self.rect.x - 4, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))
+		return (pygame.Rect(self.rect.x - 6, self.rect.y, self.rect.width, self.rect.height).colliderect(platform.rect))
 
 	'''Vérifie si le joueur est en colision avec une plateforme'''
 	def collision_top(self, list_plat):
@@ -564,7 +581,7 @@ def main_function():
 	try:
 		my_server = MyServer(localaddr=(sys.argv[1], int(sys.argv[2])))
 	except:
-		print('Syntaxe: python server.py <IP server> <port server>')
+		print('Syntaxe: python serverDemo.py <IP server> <port server>')
 		sys.exit(-1)	
 	my_server.launch_game()
 
